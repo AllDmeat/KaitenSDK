@@ -98,7 +98,8 @@
 - **FR-003**: SDK MUST предоставлять типизированные модели для Card, Board, Column, Lane, Space, Member, CustomProperty
 - **FR-004**: SDK MUST возвращать типизированные ошибки для всех failure cases (network, auth, not found, rate limit)
 - **FR-005**: SDK MUST читать base URL из конфигурации через `swift-configuration`
-- **FR-006**: SDK MUST читать token через secrets provider (`swift-configuration`)
+- **FR-006**: SDK MUST читать token через `swift-configuration`
+- **FR-011**: SDK MUST выбрасывать ошибку при инициализации (fail fast) если base URL или token не найдены в конфигурации
 - **FR-007**: SDK MUST компилироваться на macOS, Linux и Windows
 - **FR-008**: SDK MUST поддерживать async/await
 - **FR-009**: SDK MUST использовать `swift-tools-version: 6.2` с `.swiftLanguageMode(.v6)` на каждом таргете
