@@ -11,7 +11,7 @@ struct RetryMiddlewareTests {
     @Test("429 then 200 succeeds after retry")
     func retryThenSuccess() async throws {
         let middleware = RetryMiddleware(maxAttempts: 3)
-        var callCount = 0
+        nonisolated(unsafe) var callCount = 0
 
         let (response, _) = try await middleware.intercept(
             HTTPRequest(method: .get, scheme: "https", authority: "test.kaiten.ru", path: "/test"),

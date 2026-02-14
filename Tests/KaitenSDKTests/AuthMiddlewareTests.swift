@@ -11,7 +11,7 @@ struct AuthMiddlewareTests {
     @Test("Adds Bearer token header")
     func addsBearer() async throws {
         let middleware = AuthenticationMiddleware(token: "my-secret-token")
-        var capturedRequest: HTTPRequest?
+        nonisolated(unsafe) var capturedRequest: HTTPRequest?
 
         let _ = try await middleware.intercept(
             HTTPRequest(method: .get, scheme: "https", authority: "test.kaiten.ru", path: "/test"),
