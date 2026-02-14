@@ -51,6 +51,27 @@ public struct KaitenClient: Sendable {
             throw KaitenError.unexpectedResponse(statusCode: code)
         }
     }
+
+    // MARK: - Card Members
+
+    /// Fetches the list of members for a given card.
+    ///
+    /// - Parameter cardId: The card identifier.
+    /// - Returns: An array of ``Components.Schemas.MemberDetailed``.
+    /// - Throws: ``KaitenError`` on failure.
+    public func getCardMembers(cardId: Int) async throws -> [Components.Schemas.MemberDetailed] {
+        let response = try await client.retrieve_list_of_card_members(path: .init(card_id: cardId))
+        switch response {
+        case .ok(let ok):
+            return try ok.body.json
+        case .unauthorized(_):
+            throw KaitenError.unauthorized
+        case .forbidden(_):
+            throw KaitenError.unexpectedResponse(statusCode: 403)
+        case .undocumented(statusCode: let code, _):
+            throw KaitenError.unexpectedResponse(statusCode: code)
+        }
+    }
 }
 
 // MARK: - Configuration
