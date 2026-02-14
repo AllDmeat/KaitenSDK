@@ -104,6 +104,7 @@
 - **FR-008**: SDK MUST поддерживать async/await
 - **FR-009**: SDK MUST использовать `swift-tools-version: 6.2` с `.swiftLanguageMode(.v6)` на каждом таргете
 - **FR-010**: SDK MUST автоматически ретраить запросы при 429 (rate limit) с задержкой, используя паттерн `Task.retrying` (async retry с configurable max retries и delay)
+- **FR-012**: GitHub Actions workflows MUST иметь явные имена, описывающие что они делают (например `build-and-test.yml`, не `ci.yml`)
 
 ### Key Entities
 
