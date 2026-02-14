@@ -249,6 +249,8 @@ extension KaitenClient {
             throw KaitenError.unauthorized
         case .forbidden(_):
             throw KaitenError.unexpectedResponse(statusCode: 403)
+        case .notFound(_):
+            throw KaitenError.notFound(resource: "space", id: spaceId)
         case .undocumented(statusCode: let code, _):
             throw KaitenError.unexpectedResponse(statusCode: code)
         }
