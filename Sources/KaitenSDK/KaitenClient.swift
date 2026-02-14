@@ -30,6 +30,27 @@ public struct KaitenClient: Sendable {
             ]
         )
     }
+
+    // MARK: - Cards
+
+    /// Fetches a single card by its identifier.
+    ///
+    /// - Parameter id: The card identifier.
+    /// - Returns: The ``Components.Schemas.Card`` for the given id.
+    /// - Throws: ``KaitenError`` on failure.
+    public func getCard(id: Int) async throws -> Components.Schemas.Card {
+        let response = try await client.get_card(path: .init(card_id: id))
+        switch response {
+        case .ok(let ok):
+            return try ok.body.json
+        case .unauthorized(_):
+            throw KaitenError.unauthorized
+        case .notFound(_):
+            throw KaitenError.notFound(resource: "card", id: id)
+        case .undocumented(statusCode: let code, _):
+            throw KaitenError.unexpectedResponse(statusCode: code)
+        }
+    }
 }
 
 // MARK: - Configuration
