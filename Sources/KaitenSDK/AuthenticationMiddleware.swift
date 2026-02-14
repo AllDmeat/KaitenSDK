@@ -2,8 +2,7 @@ import Foundation
 import HTTPTypes
 import OpenAPIRuntime
 
-/// A middleware that injects a Bearer token into every outgoing request
-/// and throws ``KaitenError/unauthorized`` on 401 responses.
+/// A middleware that injects a Bearer token into every outgoing request.
 struct AuthenticationMiddleware: ClientMiddleware {
     private let token: String
 
@@ -20,13 +19,6 @@ struct AuthenticationMiddleware: ClientMiddleware {
     ) async throws -> (HTTPResponse, HTTPBody?) {
         var request = request
         request.headerFields[.authorization] = "Bearer \(token)"
-
-        let (response, responseBody) = try await next(request, body, baseURL)
-
-        if response.status == .unauthorized {
-            throw KaitenError.unauthorized
-        }
-
-        return (response, responseBody)
+        return try await next(request, body, baseURL)
     }
 }

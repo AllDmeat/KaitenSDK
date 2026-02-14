@@ -1,6 +1,7 @@
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
+import Synchronization
 import Testing
 
 @testable import KaitenSDK
@@ -11,7 +12,7 @@ struct AuthMiddlewareTests {
     @Test("Adds Bearer token header")
     func addsBearer() async throws {
         let middleware = AuthenticationMiddleware(token: "my-secret-token")
-        nonisolated(unsafe) var capturedRequest: HTTPRequest?
+        let capturedRequest = Mutex<HTTPRequest?>(nil)
 
         let _ = try await middleware.intercept(
             HTTPRequest(method: .get, scheme: "https", authority: "test.kaiten.ru", path: "/test"),
@@ -19,26 +20,27 @@ struct AuthMiddlewareTests {
             baseURL: URL(string: "https://test.kaiten.ru")!,
             operationID: "test"
         ) { request, body, baseURL in
-            capturedRequest = request
+            capturedRequest.withLock { $0 = request }
             return (HTTPResponse(status: .ok), nil)
         }
 
-        #expect(capturedRequest?.headerFields[.authorization] == "Bearer my-secret-token")
+        let header = capturedRequest.withLock { $0?.headerFields[.authorization] }
+        #expect(header == "Bearer my-secret-token")
     }
 
-    @Test("401 throws unauthorized")
-    func unauthorized() async throws {
+    @Test("Passes through 401 without throwing")
+    func passesThrough401() async throws {
         let middleware = AuthenticationMiddleware(token: "bad-token")
 
-        await #expect(throws: KaitenError.self) {
-            _ = try await middleware.intercept(
-                HTTPRequest(method: .get, scheme: "https", authority: "test.kaiten.ru", path: "/test"),
-                body: nil,
-                baseURL: URL(string: "https://test.kaiten.ru")!,
-                operationID: "test"
-            ) { _, _, _ in
-                (HTTPResponse(status: .unauthorized), nil)
-            }
+        let (response, _) = try await middleware.intercept(
+            HTTPRequest(method: .get, scheme: "https", authority: "test.kaiten.ru", path: "/test"),
+            body: nil,
+            baseURL: URL(string: "https://test.kaiten.ru")!,
+            operationID: "test"
+        ) { _, _, _ in
+            (HTTPResponse(status: .unauthorized), nil)
         }
+
+        #expect(response.status == .unauthorized)
     }
 }

@@ -1,6 +1,7 @@
 import Foundation
 import HTTPTypes
 import OpenAPIRuntime
+import Synchronization
 import Testing
 
 @testable import KaitenSDK
@@ -11,7 +12,7 @@ struct RetryMiddlewareTests {
     @Test("429 then 200 succeeds after retry")
     func retryThenSuccess() async throws {
         let middleware = RetryMiddleware(maxAttempts: 3)
-        nonisolated(unsafe) var callCount = 0
+        let callCount = Mutex(0)
 
         let (response, _) = try await middleware.intercept(
             HTTPRequest(method: .get, scheme: "https", authority: "test.kaiten.ru", path: "/test"),
@@ -19,8 +20,11 @@ struct RetryMiddlewareTests {
             baseURL: URL(string: "https://test.kaiten.ru")!,
             operationID: "test"
         ) { _, _, _ in
-            callCount += 1
-            if callCount == 1 {
+            let count = callCount.withLock { val in
+                val += 1
+                return val
+            }
+            if count == 1 {
                 return (HTTPResponse(status: .tooManyRequests, headerFields: HTTPFields([
                     HTTPField(name: HTTPField.Name("Retry-After")!, value: "0"),
                 ])), nil)
@@ -29,7 +33,7 @@ struct RetryMiddlewareTests {
         }
 
         #expect(response.status == .ok)
-        #expect(callCount == 2)
+        #expect(callCount.withLock { $0 } == 2)
     }
 
     @Test("429 three times throws rateLimited")
