@@ -97,9 +97,11 @@
 - **FR-002**: SDK MUST поддерживать авторизацию через Bearer token
 - **FR-003**: SDK MUST предоставлять типизированные модели для Card, Board, Column, Lane, Space, Member, CustomProperty
 - **FR-004**: SDK MUST возвращать типизированные ошибки для всех failure cases (network, auth, not found, rate limit)
-- **FR-005**: SDK MUST читать base URL из конфигурации через `swift-configuration`
-- **FR-006**: SDK MUST читать token через `swift-configuration`
-- **FR-011**: SDK MUST выбрасывать ошибку при инициализации (fail fast) если base URL или token не найдены в конфигурации
+- **FR-005**: SDK MUST принимать `baseURL` и `token` как
+  явные параметры инициализации. SDK не читает конфигурацию
+  самостоятельно — это ответственность вызывающего кода.
+- **FR-006**: SDK MUST выбрасывать ошибку при инициализации
+  (fail fast) если `baseURL` невалиден.
 - **FR-007**: SDK MUST компилироваться на macOS (ARM) и Linux (x86-64 и ARM)
 - **FR-008**: SDK MUST поддерживать async/await
 - **FR-009**: SDK MUST использовать `swift-tools-version: 6.2` с `.swiftLanguageMode(.v6)` на каждом таргете
