@@ -13,6 +13,7 @@ concurrency:
 jobs:
   build-and-test:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-26
