@@ -38,6 +38,10 @@ let package = Package(
             from: "1.0.2",
             traits: ["JSON"]
         ),
+        .package(
+            url: "https://github.com/apple/swift-system",
+            from: "1.4.0"
+        ),
     ],
     targets: [
         .target(
