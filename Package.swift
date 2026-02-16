@@ -78,6 +78,10 @@ let package = Package(
                     name: "Configuration",
                     package: "swift-configuration"
                 ),
+                .product(
+                    name: "SystemPackage",
+                    package: "swift-system"
+                ),
             ],
             swiftSettings: [
                 .swiftLanguageMode(.v6),
