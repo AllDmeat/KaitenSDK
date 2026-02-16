@@ -13,17 +13,21 @@ jobs:
       matrix:
         include:
           - os: macos-26
+            name: macOS ARM64
             install-swift: false
             archive-suffix: darwin_arm64
             static-swift-stdlib: false
           - os: ubuntu-latest
+            name: Linux x86_64
             install-swift: true
             archive-suffix: linux_x86_64
             static-swift-stdlib: true
           - os: ubuntu-24.04-arm
+            name: Linux ARM64
             install-swift: true
             archive-suffix: linux_arm64
             static-swift-stdlib: true
+    name: Build (${{ matrix.name }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
