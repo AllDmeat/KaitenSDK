@@ -21,7 +21,14 @@ public struct KaitenClient: Sendable {
     /// - Returns: An array of ``Components/Schemas/Card``.
     /// - Throws: ``KaitenError/unauthorized`` or ``KaitenError/unexpectedResponse(statusCode:)``.
     public func listCards(boardId: Int) async throws -> [Components.Schemas.Card] {
-        let response = try await client.get_cards(query: .init(board_id: boardId))
+        let response: Operations.get_cards.Output
+        do {
+            response = try await client.get_cards(query: .init(board_id: boardId))
+        } catch let error as ClientError where error.response?.status == .ok {
+            // Kaiten returns HTTP 200 with empty body when a board has no cards (#84).
+            // OpenAPI runtime throws ClientError for missing/empty response body.
+            return []
+        }
         switch response {
         case .ok(let ok):
             return try ok.body.json
