@@ -17,10 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: macOS
+          - name: macOS ARM64
             os: macos-26
             install-swift: false
-          - name: Linux
+          - name: Linux x86_64
             os: ubuntu-latest
             install-swift: true
     runs-on: ${{ matrix.os }}
