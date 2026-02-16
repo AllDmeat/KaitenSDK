@@ -100,7 +100,7 @@
 - **FR-005**: SDK MUST читать base URL из конфигурации через `swift-configuration`
 - **FR-006**: SDK MUST читать token через `swift-configuration`
 - **FR-011**: SDK MUST выбрасывать ошибку при инициализации (fail fast) если base URL или token не найдены в конфигурации
-- **FR-007**: SDK MUST компилироваться на macOS и Linux (Windows не поддерживается — Swift 6 недоступен на Windows)
+- **FR-007**: SDK MUST компилироваться на macOS (ARM) и Linux (x86-64 и ARM)
 - **FR-008**: SDK MUST поддерживать async/await
 - **FR-009**: SDK MUST использовать `swift-tools-version: 6.2` с `.swiftLanguageMode(.v6)` на каждом таргете
 - **FR-010**: SDK MUST автоматически ретраить запросы при 429 (rate limit) с задержкой, используя паттерн `Task.retrying` (async retry с configurable max retries и delay)
@@ -123,6 +123,6 @@
 ### Measurable Outcomes
 
 - **SC-001**: MCP-сервер может получить все карточки доски с assignees и custom properties одним вызовом SDK
-- **SC-002**: SDK компилируется без ошибок на macOS, Linux и Windows в CI
+- **SC-002**: SDK компилируется без ошибок на macOS (ARM) и Linux (x86-64 и ARM) в CI
 - **SC-003**: Все P1 user stories покрыты тестами
 - **SC-004**: Добавление нового эндпоинта = добавление в OpenAPI-спеку (код перегенерируется автоматически)
