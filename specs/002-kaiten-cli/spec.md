@@ -81,6 +81,10 @@ CLI-доступ к SDK.
     "token": "your-api-token"
   }
   ```
+- **FR-008**: CLI MUST использовать `swift-configuration`
+  (`ConfigReader` + `FileProvider<JSONSnapshot>`) для чтения
+  конфиг-файла. `swift-configuration` — зависимость только
+  CLI-таргета, не SDK.
 
 ## Success Criteria *(mandatory)*
 
