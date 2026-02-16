@@ -105,7 +105,7 @@
 - **FR-007**: SDK MUST компилироваться на macOS (ARM) и Linux (x86-64 и ARM)
 - **FR-008**: SDK MUST поддерживать async/await
 - **FR-009**: SDK MUST использовать `swift-tools-version: 6.2` с `.swiftLanguageMode(.v6)` на каждом таргете
-- **FR-010**: SDK MUST автоматически ретраить запросы при 429 (rate limit) с задержкой, используя паттерн `Task.retrying` (async retry с configurable max retries и delay)
+- **FR-010**: SDK MUST автоматически ретраить запросы при 429 (rate limit) с задержкой (configurable max retries и delay). Реализация через `ClientMiddleware`.
 - **FR-012**: GitHub Actions workflows MUST иметь явные имена, описывающие что они делают (например `build-and-test.yml`, не `ci.yml`)
 - **FR-013**: CI MUST кешировать SPM-зависимости между запусками для ускорения сборки
 - **FR-014**: Код НЕ ДОЛЖЕН использовать `nonisolated(unsafe)`. Для мутабельного состояния в Sendable контексте использовать `Mutex` из `import Synchronization`
@@ -116,7 +116,7 @@
 - **Board**: id, title, columns, lanes
 - **Column**: id, title, sortOrder, subcolumns
 - **Lane**: id, title, sortOrder
-- **Space**: id, title, boards
+- **Space**: id, title (boards fetched separately via `listBoards(spaceId:)`)
 - **Member**: id, userId, fullName, role
 - **CustomProperty**: id, name, type, value (typed: string, number, select, multiselect, date, user)
 
