@@ -33,7 +33,7 @@ struct GlobalOptions: ParsableArguments {
     var token: String?
 
     func makeClient() async throws -> KaitenClient {
-        let configPath = Self.preferencesPath
+        let configPath = Self.configPath
 
         let config = ConfigReader(providers: [
             (try? await FileProvider<JSONSnapshot>(filePath: configPath)) as ConfigProvider?,
@@ -52,16 +52,16 @@ struct GlobalOptions: ParsableArguments {
         return try KaitenClient(baseURL: baseURL, token: apiToken)
     }
 
-    private static var preferencesPath: String {
+    private static var configPath: String {
         let home = FileManager.default.homeDirectoryForCurrentUser
         #if os(macOS)
         return home.appendingPathComponent(
-            "Library/Application Support/kaiten-mcp/preferences.json"
+            "Library/Application Support/kaiten-mcp/config.json"
         ).path
         #else
         let xdgConfig = ProcessInfo.processInfo.environment["XDG_CONFIG_HOME"]
             ?? (home.path + "/.config")
-        return xdgConfig + "/kaiten-mcp/preferences.json"
+        return xdgConfig + "/kaiten-mcp/config.json"
         #endif
     }
 }
