@@ -54,15 +54,7 @@ struct GlobalOptions: ParsableArguments {
 
     private static var configPath: String {
         let home = FileManager.default.homeDirectoryForCurrentUser
-        #if os(macOS)
-        return home.appendingPathComponent(
-            "Library/Application Support/kaiten-mcp/config.json"
-        ).path
-        #else
-        let xdgConfig = ProcessInfo.processInfo.environment["XDG_CONFIG_HOME"]
-            ?? (home.path + "/.config")
-        return xdgConfig + "/kaiten-mcp/config.json"
-        #endif
+        return home.appendingPathComponent(".config/kaiten-mcp/config.json").path
     }
 }
 

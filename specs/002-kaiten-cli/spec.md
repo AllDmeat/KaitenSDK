@@ -74,8 +74,7 @@ CLI-доступ к SDK.
 - **FR-006**: CLI MUST компилироваться и работать на macOS (ARM)
   и Linux (x86-64 и ARM).
 - **FR-007**: Конфигурация хранится в двух файлах в общей
-  директории `~/.config/kaiten-mcp/` (Linux) или
-  `~/Library/Application Support/kaiten-mcp/` (macOS):
+  директории `~/.config/kaiten-mcp/` (все платформы):
   - **`config.json`** — подключение (url, token):
     ```json
     {
