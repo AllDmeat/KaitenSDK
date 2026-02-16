@@ -16,6 +16,8 @@ public enum KaitenError: Error, Sendable {
     case serverError(statusCode: Int, body: String?)
     /// A network-level error occurred.
     case networkError(underlying: any Error)
+    /// A decoding error occurred while parsing the response.
+    case decodingError(underlying: any Error)
     /// The API returned an unexpected HTTP status code.
     case unexpectedResponse(statusCode: Int)
 }
@@ -43,6 +45,8 @@ extension KaitenError: LocalizedError {
             "Server error \(statusCode)" + (body.map { ": \($0)" } ?? "")
         case .networkError(let underlying):
             "Network error: \(underlying.localizedDescription)"
+        case .decodingError(let underlying):
+            "Decoding error: \(underlying.localizedDescription)"
         case .unexpectedResponse(let statusCode):
             "Unexpected HTTP response: \(statusCode)"
         }

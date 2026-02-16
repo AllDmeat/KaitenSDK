@@ -96,7 +96,7 @@
 - **FR-001**: SDK MUST генерировать клиентский код из OpenAPI-спеки через `swift-openapi-generator`
 - **FR-002**: SDK MUST поддерживать авторизацию через Bearer token
 - **FR-003**: SDK MUST предоставлять типизированные модели для Card, Board, Column, Lane, Space, Member, CustomProperty
-- **FR-004**: SDK MUST возвращать типизированные ошибки для всех failure cases (network, auth, not found, rate limit)
+- **FR-004**: SDK MUST возвращать типизированные ошибки для всех failure cases (network, auth, not found, rate limit). Все публичные методы MUST использовать typed throws (`throws(KaitenError)`) вместо untyped `throws`.
 - **FR-005**: SDK MUST принимать `baseURL` и `token` как
   явные параметры инициализации. SDK не читает конфигурацию
   самостоятельно — это ответственность вызывающего кода.

@@ -9,41 +9,11 @@ public struct KaitenClient: Sendable {
     private let client: Client
     private let config: KaitenConfiguration
 
-    /// Creates a new ``KaitenClient``.
-    ///
-    /// - Throws: ``KaitenError/missingConfiguration(_:)`` if `KAITEN_URL` or `KAITEN_TOKEN`
-    ///   are not found in the environment.
-    // MARK: - Cards
-
-    /// Returns all cards for the given board.
-    ///
-    /// - Parameter boardId: The board to fetch cards from.
-    /// - Returns: An array of ``Components/Schemas/Card``.
-    /// - Throws: ``KaitenError/unauthorized`` or ``KaitenError/unexpectedResponse(statusCode:)``.
-    public func listCards(boardId: Int) async throws -> [Components.Schemas.Card] {
-        let response: Operations.get_cards.Output
-        do {
-            response = try await client.get_cards(query: .init(board_id: boardId))
-        } catch let error as ClientError where error.response?.status == .ok {
-            // Kaiten returns HTTP 200 with empty body when a board has no cards (#84).
-            // OpenAPI runtime throws ClientError for missing/empty response body.
-            return []
-        }
-        switch response {
-        case .ok(let ok):
-            return try ok.body.json
-        case .unauthorized:
-            throw KaitenError.unauthorized
-        case .undocumented(statusCode: let code, _):
-            throw KaitenError.unexpectedResponse(statusCode: code)
-        }
-    }
-
     // MARK: - Initialization
 
     /// Internal initializer for testing with a custom transport.
     /// Internal initializer for testing with a custom transport and explicit config.
-    init(baseURL: String, token: String, transport: any ClientTransport) throws {
+    init(baseURL: String, token: String, transport: any ClientTransport) throws(KaitenError) {
         self.config = KaitenConfiguration(baseURL: baseURL, token: token)
         let url = try URL(string: baseURL)
             .orThrow(KaitenError.invalidURL(baseURL))
@@ -57,7 +27,7 @@ public struct KaitenClient: Sendable {
         )
     }
 
-    public init(baseURL: String, token: String) throws {
+    public init(baseURL: String, token: String) throws(KaitenError) {
         self.config = KaitenConfiguration(baseURL: baseURL, token: token)
 
         let url = try URL(string: baseURL)
@@ -75,16 +45,59 @@ public struct KaitenClient: Sendable {
 
     // MARK: - Cards
 
+    /// Returns all cards for the given board.
+    ///
+    /// - Parameter boardId: The board to fetch cards from.
+    /// - Returns: An array of ``Components/Schemas/Card``.
+    /// - Throws: ``KaitenError/unauthorized`` or ``KaitenError/unexpectedResponse(statusCode:)``.
+    public func listCards(boardId: Int) async throws(KaitenError) -> [Components.Schemas.Card] {
+        let response: Operations.get_cards.Output
+        do {
+            response = try await client.get_cards(query: .init(board_id: boardId))
+        } catch let error as ClientError where error.response?.status == .ok {
+            // Kaiten returns HTTP 200 with empty body when a board has no cards (#84).
+            // OpenAPI runtime throws ClientError for missing/empty response body.
+            return []
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
+        switch response {
+        case .ok(let ok):
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
+        case .unauthorized:
+            throw KaitenError.unauthorized
+        case .undocumented(statusCode: let code, _):
+            throw KaitenError.unexpectedResponse(statusCode: code)
+        }
+    }
+
     /// Fetches a single card by its identifier.
     ///
     /// - Parameter id: The card identifier.
     /// - Returns: The ``Components.Schemas.Card`` for the given id.
     /// - Throws: ``KaitenError`` on failure.
-    public func getCard(id: Int) async throws -> Components.Schemas.Card {
-        let response = try await client.get_card(path: .init(card_id: id))
+    public func getCard(id: Int) async throws(KaitenError) -> Components.Schemas.Card {
+        let response: Operations.get_card.Output
+        do {
+            response = try await client.get_card(path: .init(card_id: id))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .notFound(_):
@@ -101,11 +114,22 @@ public struct KaitenClient: Sendable {
     /// - Parameter cardId: The card identifier.
     /// - Returns: An array of ``Components.Schemas.MemberDetailed``.
     /// - Throws: ``KaitenError`` on failure.
-    public func getCardMembers(cardId: Int) async throws -> [Components.Schemas.MemberDetailed] {
-        let response = try await client.retrieve_list_of_card_members(path: .init(card_id: cardId))
+    public func getCardMembers(cardId: Int) async throws(KaitenError) -> [Components.Schemas.MemberDetailed] {
+        let response: Operations.retrieve_list_of_card_members.Output
+        do {
+            response = try await client.retrieve_list_of_card_members(path: .init(card_id: cardId))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -127,11 +151,22 @@ struct KaitenConfiguration: Sendable {
 
 extension KaitenClient {
     /// List all custom property definitions for the company.
-    public func listCustomProperties() async throws -> [Components.Schemas.CustomProperty] {
-        let response = try await client.get_list_of_properties()
+    public func listCustomProperties() async throws(KaitenError) -> [Components.Schemas.CustomProperty] {
+        let response: Operations.get_list_of_properties.Output
+        do {
+            response = try await client.get_list_of_properties()
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -142,11 +177,22 @@ extension KaitenClient {
     }
 
     /// Get a single custom property definition.
-    public func getCustomProperty(id: Int) async throws -> Components.Schemas.CustomProperty {
-        let response = try await client.get_property(path: .init(id: id))
+    public func getCustomProperty(id: Int) async throws(KaitenError) -> Components.Schemas.CustomProperty {
+        let response: Operations.get_property.Output
+        do {
+            response = try await client.get_property(path: .init(id: id))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -163,11 +209,22 @@ extension KaitenClient {
 
 extension KaitenClient {
     /// Fetches a board by its identifier.
-    public func getBoard(id: Int) async throws -> Components.Schemas.Board {
-        let response = try await client.get_board(path: .init(id: id))
+    public func getBoard(id: Int) async throws(KaitenError) -> Components.Schemas.Board {
+        let response: Operations.get_board.Output
+        do {
+            response = try await client.get_board(path: .init(id: id))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -180,11 +237,22 @@ extension KaitenClient {
     }
 
     /// Fetches columns for a board.
-    public func getBoardColumns(boardId: Int) async throws -> [Components.Schemas.Column] {
-        let response = try await client.get_list_of_columns(path: .init(board_id: boardId))
+    public func getBoardColumns(boardId: Int) async throws(KaitenError) -> [Components.Schemas.Column] {
+        let response: Operations.get_list_of_columns.Output
+        do {
+            response = try await client.get_list_of_columns(path: .init(board_id: boardId))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -197,11 +265,22 @@ extension KaitenClient {
     }
 
     /// Fetches lanes for a board.
-    public func getBoardLanes(boardId: Int) async throws -> [Components.Schemas.Lane] {
-        let response = try await client.get_list_of_lanes(path: .init(board_id: boardId))
+    public func getBoardLanes(boardId: Int) async throws(KaitenError) -> [Components.Schemas.Lane] {
+        let response: Operations.get_list_of_lanes.Output
+        do {
+            response = try await client.get_list_of_lanes(path: .init(board_id: boardId))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -218,11 +297,22 @@ extension KaitenClient {
 
 extension KaitenClient {
     /// Lists all spaces.
-    public func listSpaces() async throws -> [Components.Schemas.Space] {
-        let response = try await client.retrieve_list_of_spaces()
+    public func listSpaces() async throws(KaitenError) -> [Components.Schemas.Space] {
+        let response: Operations.retrieve_list_of_spaces.Output
+        do {
+            response = try await client.retrieve_list_of_spaces()
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .undocumented(statusCode: let code, _):
@@ -231,11 +321,22 @@ extension KaitenClient {
     }
 
     /// Lists boards in a space.
-    public func listBoards(spaceId: Int) async throws -> [Components.Schemas.BoardInSpace] {
-        let response = try await client.get_list_of_boards(path: .init(space_id: spaceId))
+    public func listBoards(spaceId: Int) async throws(KaitenError) -> [Components.Schemas.BoardInSpace] {
+        let response: Operations.get_list_of_boards.Output
+        do {
+            response = try await client.get_list_of_boards(path: .init(space_id: spaceId))
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                throw .decodingError(underlying: error)
+            }
         case .unauthorized(_):
             throw KaitenError.unauthorized
         case .forbidden(_):
@@ -248,12 +349,10 @@ extension KaitenClient {
     }
 }
 
-// MARK: - Errors
-
 // MARK: - Helpers
 
 extension Optional {
-    func orThrow(_ error: @autoclosure () -> some Error) throws -> Wrapped {
+    func orThrow(_ error: @autoclosure () -> KaitenError) throws(KaitenError) -> Wrapped {
         guard let self else { throw error() }
         return self
     }
