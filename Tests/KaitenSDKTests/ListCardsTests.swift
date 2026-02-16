@@ -31,6 +31,24 @@ struct ListCardsTests {
         #expect(cards.isEmpty)
     }
 
+    @Test("200 with empty body returns empty array (#84)")
+    func emptyBody() async throws {
+        let transport = MockClientTransport.returning(statusCode: 200, body: nil)
+        let client = try KaitenClient(baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+        let cards = try await client.listCards(boardId: 10)
+        #expect(cards.isEmpty)
+    }
+
+    @Test("200 with empty string body returns empty array (#84)")
+    func emptyStringBody() async throws {
+        let transport = MockClientTransport.returning(statusCode: 200, body: "")
+        let client = try KaitenClient(baseURL: "https://test.kaiten.ru/api/latest", token: "test-token", transport: transport)
+
+        let cards = try await client.listCards(boardId: 10)
+        #expect(cards.isEmpty)
+    }
+
     @Test("401 throws unauthorized")
     func unauthorized() async throws {
         let transport = MockClientTransport.returning(statusCode: 401)

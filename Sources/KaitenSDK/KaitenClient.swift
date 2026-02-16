@@ -24,7 +24,12 @@ public struct KaitenClient: Sendable {
         let response = try await client.get_cards(query: .init(board_id: boardId))
         switch response {
         case .ok(let ok):
-            return try ok.body.json
+            do {
+                return try ok.body.json
+            } catch {
+                // Kaiten returns HTTP 200 with empty body when a board has no cards (#84)
+                return []
+            }
         case .unauthorized:
             throw KaitenError.unauthorized
         case .undocumented(statusCode: let code, _):
