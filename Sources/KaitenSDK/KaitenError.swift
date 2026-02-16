@@ -19,7 +19,7 @@ public enum KaitenError: Error, Sendable {
     /// A decoding error occurred while parsing the response.
     case decodingError(underlying: any Error)
     /// The API returned an unexpected HTTP status code.
-    case unexpectedResponse(statusCode: Int)
+    case unexpectedResponse(statusCode: Int, body: String? = nil)
 }
 
 // MARK: - LocalizedError
@@ -47,8 +47,8 @@ extension KaitenError: LocalizedError {
             "Network error: \(underlying.localizedDescription)"
         case .decodingError(let underlying):
             "Decoding error: \(underlying.localizedDescription)"
-        case .unexpectedResponse(let statusCode):
-            "Unexpected HTTP response: \(statusCode)"
+        case .unexpectedResponse(let statusCode, let body):
+            "Unexpected HTTP response: \(statusCode)" + (body.map { ": \($0)" } ?? "")
         }
     }
 }
