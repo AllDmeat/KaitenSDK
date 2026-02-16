@@ -35,7 +35,8 @@ let package = Package(
         ),
         .package(
             url: "https://github.com/apple/swift-configuration",
-            from: "1.0.0"
+            from: "1.0.0",
+            traits: ["JSON"]
         ),
     ],
     targets: [
