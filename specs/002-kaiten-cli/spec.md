@@ -3,103 +3,101 @@
 **Feature Branch**: `002-kaiten-cli`
 **Created**: 2026-02-16
 **Status**: Draft
-**Input**: User description: "Executable-таргет — тонкая обёртка над SDK без логики, пробрасывает команды в SDK"
+**Input**: User description: "An executable target — a thin wrapper over the SDK with no logic, forwards commands to the SDK"
 
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - CLI-доступ к Kaiten (Priority: P1)
+### User Story 1 - CLI Access to Kaiten (Priority: P1)
 
-DevOps-инженер или разработчик использует CLI для доступа к
-данным Kaiten без написания кода. CLI является тонкой обёрткой
-над SDK — парсит CLI-аргументы и конфиг-файл, собирает из них
-единый набор параметров и передаёт в SDK. Никакой бизнес-логики.
+A DevOps engineer or developer uses the CLI to access Kaiten data
+without writing code. The CLI is a thin wrapper over the SDK — it
+parses CLI arguments and the config file, assembles a unified set
+of parameters, and passes them to the SDK. No business logic.
 
-**Why this priority**: Единственная задача этой фичи — дать
-CLI-доступ к SDK.
+**Why this priority**: The sole purpose of this feature is to
+provide CLI access to the SDK.
 
-**Independent Test**: Запустить бинарник с `--url`, `--token`
-и подкомандой (например `list-spaces`). Структурированный вывод
-в stdout подтверждает работоспособность.
+**Independent Test**: Run the binary with `--url`, `--token`
+and a subcommand (e.g. `list-spaces`). Structured output in
+stdout confirms it works.
 
 **Acceptance Scenarios**:
 
-1. **Given** валидные `--url` и `--token` флаги, **When**
-   пользователь запускает подкоманду (например `list-spaces`),
-   **Then** CLI выводит структурированные данные в stdout.
-2. **Given** существует валидный конфиг-файл
-   `~/.config/kaiten-mcp/config.json`, **When** пользователь
-   запускает подкоманду без флагов, **Then** CLI читает
-   параметры из конфиг-файла.
-3. **Given** присутствуют и флаги и конфиг-файл с разными
-   значениями, **When** пользователь указывает `--url` или
-   `--token`, **Then** флаги имеют приоритет над конфиг-файлом.
-4. **Given** ни флаги, ни конфиг-файл не предоставляют
-   обязательный параметр, **When** пользователь запускает
-   подкоманду, **Then** CLI выходит с понятным сообщением об
-   ошибке, указывающим какой параметр отсутствует и где его
-   можно задать (флаг или конфиг-файл).
-5. **Given** SDK возвращает ошибку, **When** пользователь
-   запускает подкоманду, **Then** CLI выводит человекочитаемое
-   сообщение об ошибке в stderr и завершается с ненулевым
-   кодом возврата.
+1. **Given** valid `--url` and `--token` flags, **When** the
+   user runs a subcommand (e.g. `list-spaces`), **Then** the
+   CLI outputs structured data to stdout.
+2. **Given** a valid config file exists at
+   `~/.config/kaiten-mcp/config.json`, **When** the user runs
+   a subcommand without flags, **Then** the CLI reads parameters
+   from the config file.
+3. **Given** both flags and a config file with different values
+   are present, **When** the user specifies `--url` or `--token`,
+   **Then** flags take priority over the config file.
+4. **Given** neither flags nor the config file provide a required
+   parameter, **When** the user runs a subcommand, **Then** the
+   CLI exits with a clear error message indicating which parameter
+   is missing and where it can be set (flag or config file).
+5. **Given** the SDK returns an error, **When** the user runs a
+   subcommand, **Then** the CLI outputs a human-readable error
+   message to stderr and exits with a non-zero exit code.
 
 ---
 
 ### Edge Cases
 
-- Что если CLI запущен без подкоманды? CLI MUST вывести справку
-  и завершиться с ненулевым кодом.
-- Что если конфиг-файл существует, но содержит невалидный JSON?
-  CLI MUST вывести ошибку с описанием проблемы конфигурации.
-- Что если конфиг-файл не существует и флаги не переданы?
-  CLI MUST вывести ошибку с инструкцией: передать флаги или
-  создать `~/.config/kaiten-mcp/config.json`.
+- What if the CLI is run without a subcommand? The CLI MUST print
+  help and exit with a non-zero code.
+- What if the config file exists but contains invalid JSON? The CLI
+  MUST output an error describing the configuration problem.
+- What if the config file does not exist and no flags are passed?
+  The CLI MUST output an error with instructions: pass flags or
+  create `~/.config/kaiten-mcp/config.json`.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: CLI MUST быть тонкой обёрткой над SDK без
-  собственной бизнес-логики. CLI парсит аргументы и
-  конфиг-файл, собирает единый Input и передаёт в SDK.
-- **FR-002**: CLI MUST предоставлять подкоманду для каждого
-  convenience-метода SDK с соответствующими аргументами.
-- **FR-003**: CLI MUST резолвить параметры подключения в
-  порядке приоритета: флаги командной строки > конфиг-файл.
-  Переменные окружения НЕ используются.
-- **FR-004**: CLI MUST выводить структурированные данные в
-  stdout и ошибки в stderr.
-- **FR-005**: CLI MUST завершаться с кодом 0 при успехе и
-  ненулевым при ошибке.
-- **FR-006**: CLI MUST компилироваться и работать на macOS (ARM)
-  и Linux (x86-64 и ARM).
-- **FR-007**: Конфигурация хранится в двух файлах в общей
-  директории `~/.config/kaiten-mcp/` (все платформы):
-  - **`config.json`** — подключение (url, token):
+- **FR-001**: The CLI MUST be a thin wrapper over the SDK with no
+  business logic of its own. The CLI parses arguments and the
+  config file, assembles a unified Input, and passes it to the SDK.
+- **FR-002**: The CLI MUST provide a subcommand for each SDK
+  convenience method with corresponding arguments.
+- **FR-003**: The CLI MUST resolve connection parameters in
+  priority order: command-line flags > config file.
+  Environment variables are NOT used.
+- **FR-004**: The CLI MUST output structured data to stdout and
+  errors to stderr.
+- **FR-005**: The CLI MUST exit with code 0 on success and
+  non-zero on error.
+- **FR-006**: The CLI MUST compile and run on macOS (ARM) and
+  Linux (x86-64 and ARM).
+- **FR-007**: Configuration is stored in two files in a shared
+  directory `~/.config/kaiten-mcp/` (all platforms):
+  - **`config.json`** — connection settings (url, token):
     ```json
     {
       "url": "https://company.kaiten.ru/api/latest",
       "token": "your-api-token"
     }
     ```
-  - **`preferences.json`** — пользовательские настройки
-    (избранные доски, пространства). Управляется KaitenMCP.
-    CLI не читает и не пишет этот файл.
+  - **`preferences.json`** — user preferences (favorite boards,
+    spaces). Managed by KaitenMCP. The CLI does not read or write
+    this file.
 
-  CLI читает только `config.json`.
-- **FR-008**: CLI MUST использовать `swift-configuration`
-  (`ConfigReader` + `FileProvider<JSONSnapshot>`) для чтения
-  конфиг-файла. `swift-configuration` — зависимость только
-  CLI-таргета, не SDK.
+  The CLI reads only `config.json`.
+- **FR-008**: The CLI MUST use `swift-configuration`
+  (`ConfigReader` + `FileProvider<JSONSnapshot>`) to read the
+  config file. `swift-configuration` is a dependency of the CLI
+  target only, not the SDK.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: CLI можно использовать в скриптах автоматизации —
-  каждая подкоманда принимает все входные данные через флаги
-  или конфиг-файл и выдаёт машиночитаемый вывод.
-- **SC-002**: CLI не содержит дублирования логики SDK — каждая
-  подкоманда только вызывает соответствующий метод SDK.
-- **SC-003**: CLI компилируется и работает на macOS (ARM) и
-  Linux (x86-64 и ARM).
+- **SC-001**: The CLI can be used in automation scripts — each
+  subcommand accepts all input via flags or config file and
+  produces machine-readable output.
+- **SC-002**: The CLI contains no duplication of SDK logic — each
+  subcommand only calls the corresponding SDK method.
+- **SC-003**: The CLI compiles and runs on macOS (ARM) and
+  Linux (x86-64 and ARM).

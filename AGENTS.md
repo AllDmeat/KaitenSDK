@@ -13,50 +13,50 @@ No exceptions. Existing Russian content will be translated (see #163).
 
 ## Spec-First Development
 
-Спецификации в `specs/` — единственный источник правды о том,
-что и как делается в проекте.
+Specifications in `specs/` are the single source of truth for what
+is being built and how.
 
-### Порядок работы
+### Workflow
 
-1. **Сначала спека** — перед реализацией нового функционала
-   обновить или создать спецификацию в `specs/`.
-2. **Потом реализация** — код пишется строго по спеке.
-3. **Каждое изменение** функционала MUST сопровождаться
-   обновлением соответствующей спеки.
+1. **Spec first** — before implementing new functionality,
+   update or create a specification in `specs/`.
+2. **Then implement** — code is written strictly according to the spec.
+3. **Every change** to functionality MUST be accompanied by
+   an update to the corresponding spec.
 
-### Структура спек
+### Spec Structure
 
-- `specs/001-kaiten-sdk-core/spec.md` — SDK: OpenAPI-генерация,
-  типизированные ошибки, convenience-обёртки
-- `specs/002-kaiten-cli/spec.md` — CLI: тонкая обёртка над SDK,
-  конфиг-файл, подкоманды
+- `specs/001-kaiten-sdk-core/spec.md` — SDK: OpenAPI generation,
+  typed errors, convenience wrappers
+- `specs/002-kaiten-cli/spec.md` — CLI: thin wrapper over SDK,
+  config file, subcommands
 
-### Конституция
+### Constitution
 
-Архитектурные принципы и ограничения зафиксированы в
-`.specify/memory/constitution.md`. Конституция имеет приоритет
-над всеми другими практиками.
+Architectural principles and constraints are documented in
+`.specify/memory/constitution.md`. The constitution takes priority
+over all other project practices.
 
-### Правила для агентов
+### Rules for Agents
 
-- НЕ реализовывать функционал, не описанный в спеке.
-- При обнаружении расхождения между кодом и спекой —
-  уточнить у пользователя, что является правильным.
-- При добавлении нового функционала — сначала обновить спеку,
-  получить подтверждение, затем реализовать.
+- DO NOT implement functionality not described in the spec.
+- If a discrepancy between code and spec is found,
+  clarify with the user which is correct.
+- When adding new functionality — update the spec first,
+  get confirmation, then implement.
 - Always update READMEs when public APIs change. Any PR that
   modifies public API surface must include corresponding README
   updates.
 
 ## Kaiten API Documentation
 
-Подробный гайд по парсингу документации Kaiten API: [docs/kaiten-docs-parsing.md](docs/kaiten-docs-parsing.md)
+Detailed guide for parsing Kaiten API documentation: [docs/kaiten-docs-parsing.md](docs/kaiten-docs-parsing.md)
 
-### Обязательное правило
+### Mandatory Rule
 
-**Перед любым изменением OpenAPI спеки** (`openapi/kaiten.yaml`) — обязательно проверить по документации Kaiten API (https://developers.kaiten.ru), как эндпоинт выглядит на самом деле:
-- Какие query/path параметры принимает
-- Какие поля в ответе обязательные (`integer`, `string`), а какие nullable (`null | string`)
-- Есть ли пагинация (`offset`/`limit`)
+**Before any change to the OpenAPI spec** (`openapi/kaiten.yaml`) — you must verify against the Kaiten API documentation (https://developers.kaiten.ru) how the endpoint actually works:
+- Which query/path parameters it accepts
+- Which response fields are required (`integer`, `string`) and which are nullable (`null | string`)
+- Whether pagination is supported (`offset`/`limit`)
 
-Не менять спеку по догадкам или на основе эмпирических данных. Только по документации.
+Do not modify the spec based on guesses or empirical data. Only based on documentation.
