@@ -211,6 +211,94 @@ struct ListCards: AsyncParsableCommand {
     }
 }
 
+struct CreateCard: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "create-card",
+        abstract: "Create a new card on a board"
+    )
+
+    @OptionGroup var global: GlobalOptions
+
+    @Option(name: .long, help: "Board ID (required)")
+    var boardId: Int
+
+    @Option(name: .long, help: "Card title (required)")
+    var title: String
+
+    @Option(name: .long, help: "Column ID")
+    var columnId: Int?
+
+    @Option(name: .long, help: "Lane ID")
+    var laneId: Int?
+
+    @Option(name: .long, help: "Card description")
+    var description: String?
+
+    @Option(name: .long, help: "ASAP marker")
+    var asap: Bool?
+
+    @Option(name: .long, help: "Deadline (ISO 8601)")
+    var dueDate: String?
+
+    @Option(name: .long, help: "Deadline includes hours and minutes")
+    var dueDateTimePresent: Bool?
+
+    @Option(name: .long, help: "Position in the cell")
+    var sortOrder: Double?
+
+    @Option(name: .long, help: "Fixed deadline flag")
+    var expiresLater: Bool?
+
+    @Option(name: .long, help: "Size text (e.g. '1', 'S', 'XL')")
+    var sizeText: String?
+
+    @Option(name: .long, help: "Owner user ID")
+    var ownerId: Int?
+
+    @Option(name: .long, help: "Responsible user ID")
+    var responsibleId: Int?
+
+    @Option(name: .long, help: "Owner email address")
+    var ownerEmail: String?
+
+    @Option(name: .long, help: "1 - first in cell, 2 - last in cell")
+    var position: Int?
+
+    @Option(name: .long, help: "Card type ID")
+    var typeId: Int?
+
+    @Option(name: .long, help: "External ID")
+    var externalId: String?
+
+    @Option(name: .long, help: "Text format: 1 - markdown, 2 - html, 3 - jira wiki")
+    var textFormatTypeId: Int?
+
+    func run() async throws {
+        let client = try await global.makeClient()
+        let card = try await client.createCard(
+            title: title,
+            boardId: boardId,
+            columnId: columnId,
+            laneId: laneId,
+            description: description,
+            asap: asap,
+            dueDate: dueDate,
+            dueDateTimePresent: dueDateTimePresent,
+            sortOrder: sortOrder,
+            expiresLater: expiresLater,
+            sizeText: sizeText,
+            ownerId: ownerId,
+            responsibleId: responsibleId,
+            ownerEmail: ownerEmail,
+            position: position,
+            typeId: typeId,
+            externalId: externalId,
+            textFormatTypeId: textFormatTypeId
+        )
+        try printJSON(card)
+    }
+}
+
 struct GetCard: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "get-card",
