@@ -1,6 +1,6 @@
-# KaitenSDK
+# kaiten-sdk
 
-[![Build](https://github.com/AllDmeat/KaitenSDK/actions/workflows/ci.yml/badge.svg)](https://github.com/AllDmeat/KaitenSDK/actions/workflows/ci.yml)
+[![Build](https://github.com/AllDmeat/kaiten-sdk/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/AllDmeat/kaiten-sdk/actions/workflows/build-and-test.yml)
 
 Swift SDK for the [Kaiten](https://kaiten.ru) project management API. OpenAPI-generated types with typed errors, automatic retry on `429 Too Many Requests`, and Bearer token authentication.
 
@@ -15,7 +15,7 @@ Add KaitenSDK to your `Package.swift`:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/AllDmeat/KaitenSDK.git", from: "0.1.0"),
+    .package(url: "https://github.com/AllDmeat/kaiten-sdk.git", from: "0.1.0"),
 ],
 targets: [
     .target(
@@ -51,12 +51,12 @@ let card = try await client.getCard(id: 123)
 [mise](https://mise.jdx.dev) — a tool version manager. It will install the required version automatically:
 
 ```bash
-mise use -g ubi:AllDmeat/KaitenSDK --rename kaiten
+mise use github:AllDmeat/kaiten-sdk
 ```
 
 #### GitHub Release
 
-Download the binary for your platform from the [releases page](https://github.com/AllDmeat/KaitenSDK/releases).
+Download the binary for your platform from the [releases page](https://github.com/AllDmeat/kaiten-sdk/releases).
 
 #### From Source
 
