@@ -131,6 +131,22 @@ A developer requests all spaces and boards — for navigation.
 - **Member**: id, userId, fullName, role
 - **CustomProperty**: id, name, type, value (typed: string, number, select, multiselect, date, user)
 
+### User Story 7 — Create a Comment on a Card (Priority: P2)
+
+A developer creates a new comment on a card with markdown text.
+
+**Why this priority**: Write operations extend the SDK beyond read-only use, enabling automation workflows.
+
+**Independent Test**: Call `client.createComment(cardId: 123, text: "Hello")`, receive a `Comment` with the created fields.
+
+**Acceptance Scenarios**:
+
+1. **Given** a valid card ID and text, **When** I call `createComment(cardId:text:)`, **Then** I receive a `Comment` with the created text
+2. **Given** an invalid card ID, **When** I call `createComment(cardId:text:)`, **Then** I receive a `notFound` error
+3. **Given** an invalid token, **When** I call `createComment(cardId:text:)`, **Then** I receive an `unauthorized` error
+
+---
+
 ## Success Criteria
 
 ### Measurable Outcomes
