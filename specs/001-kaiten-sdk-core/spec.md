@@ -119,6 +119,8 @@ A developer requests all spaces and boards — for navigation.
   - **Cross-checking is mandatory** — for any spec change, compare with documentation + verify against the real API. Documentation parsing guide: [docs/kaiten-docs-parsing.md](../../docs/kaiten-docs-parsing.md).
 - **FR-017**: All public types (structs, enums, protocols) and methods MUST have Swift doc comments (`///`) following DocC conventions. Doc comments MUST include `- Parameter`, `- Returns`, and `- Throws` tags where applicable.
 
+- **FR-018**: SDK MUST support ALL query parameters documented in the Kaiten API for every endpoint in the spec. No subset, no phasing — every filter the API accepts MUST be present in the OpenAPI spec and exposed in the SDK's public API with backward-compatible optional defaults.
+
 ### Key Entities
 
 - **Card**: id, title, description, state, column, members, customProperties, tags, created, updated

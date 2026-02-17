@@ -49,6 +49,11 @@ paths:
         schema:
           type: integer
         description: Board ID
+      - name: condition
+        in: query
+        schema:
+          type: integer
+        description: "Lane condition filter: 1 = live, 2 = archived, 3 = deleted"
       responses:
         '200':
           description: success
@@ -118,6 +123,234 @@ paths:
         schema:
           type: integer
         description: Limit for pagination
+      # Date filters
+      - name: created_before
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards created before this date
+      - name: created_after
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards created after this date
+      - name: updated_before
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards updated before this date
+      - name: updated_after
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards updated after this date
+      - name: first_moved_in_progress_after
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards first moved to in-progress after this date
+      - name: first_moved_in_progress_before
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards first moved to in-progress before this date
+      - name: last_moved_to_done_at_after
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards last moved to done after this date
+      - name: last_moved_to_done_at_before
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards last moved to done before this date
+      - name: due_date_after
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards with due date after this date
+      - name: due_date_before
+        in: query
+        schema:
+          type: string
+          format: date-time
+        description: Filter cards with due date before this date
+      # Text search
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Text search query
+      - name: search_fields
+        in: query
+        schema:
+          type: string
+        description: Comma-separated fields to search in
+      # Tags
+      - name: tag
+        in: query
+        schema:
+          type: string
+        description: Filter by tag name
+      - name: tag_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated tag IDs
+      # ID filters
+      - name: type_id
+        in: query
+        schema:
+          type: integer
+        description: Filter by card type ID
+      - name: type_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated card type IDs
+      - name: member_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated member user IDs
+      - name: owner_id
+        in: query
+        schema:
+          type: integer
+        description: Filter by owner user ID
+      - name: owner_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated owner user IDs
+      - name: responsible_id
+        in: query
+        schema:
+          type: integer
+        description: Filter by responsible user ID
+      - name: responsible_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated responsible user IDs
+      - name: column_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated column IDs
+      - name: space_id
+        in: query
+        schema:
+          type: integer
+        description: Filter by space ID
+      - name: external_id
+        in: query
+        schema:
+          type: string
+        description: Filter by external ID
+      - name: organizations_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated organization IDs
+      # Exclude filters
+      - name: exclude_board_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated board IDs to exclude
+      - name: exclude_lane_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated lane IDs to exclude
+      - name: exclude_column_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated column IDs to exclude
+      - name: exclude_owner_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated owner IDs to exclude
+      - name: exclude_card_ids
+        in: query
+        schema:
+          type: string
+        description: Comma-separated card IDs to exclude
+      # State filters
+      - name: condition
+        in: query
+        schema:
+          type: integer
+        description: "Card condition: 1 = on board, 2 = archived"
+      - name: states
+        in: query
+        schema:
+          type: string
+        description: "Comma-separated states: 1 = queued, 2 = in progress, 3 = done"
+      - name: archived
+        in: query
+        schema:
+          type: boolean
+        description: Filter by archived status
+      - name: asap
+        in: query
+        schema:
+          type: boolean
+        description: Filter ASAP cards
+      - name: overdue
+        in: query
+        schema:
+          type: boolean
+        description: Filter overdue cards
+      - name: done_on_time
+        in: query
+        schema:
+          type: boolean
+        description: Filter cards done on time
+      - name: with_due_date
+        in: query
+        schema:
+          type: boolean
+        description: Filter cards that have a due date
+      - name: is_request
+        in: query
+        schema:
+          type: boolean
+        description: Filter service desk request cards
+      # Sorting
+      - name: order_by
+        in: query
+        schema:
+          type: string
+        description: Field to order by
+      - name: order_direction
+        in: query
+        schema:
+          type: string
+        description: "Order direction: asc or desc"
+      - name: order_space_id
+        in: query
+        schema:
+          type: integer
+        description: Space ID for ordering context
+      # Extra
+      - name: additional_card_fields
+        in: query
+        schema:
+          type: string
+        description: Comma-separated additional fields to include
       responses:
         '200':
           description: List of cards
@@ -216,6 +449,48 @@ paths:
         schema:
           type: integer
         description: Maximum number of properties to return
+      - name: include_values
+        in: query
+        schema:
+          type: boolean
+        description: Include property values in response
+      - name: include_author
+        in: query
+        schema:
+          type: boolean
+        description: Include author details in response
+      - name: compact
+        in: query
+        schema:
+          type: boolean
+        description: Return compact representation
+      - name: load_by_ids
+        in: query
+        schema:
+          type: boolean
+        description: Load properties by IDs
+      - name: ids
+        in: query
+        schema:
+          type: array
+          items:
+            type: integer
+        description: Array of property IDs to load
+      - name: order_by
+        in: query
+        schema:
+          type: string
+        description: Field to order by
+      - name: order_direction
+        in: query
+        schema:
+          type: string
+        description: "Order direction: asc or desc"
+      - name: query
+        in: query
+        schema:
+          type: string
+        description: Text search query
       responses:
         '200':
           description: success
