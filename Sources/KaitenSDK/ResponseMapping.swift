@@ -31,7 +31,6 @@ extension Operations.update_card.Output {
         case .ok(let ok): .ok(ok.body)
         case .badRequest: .undocumented(statusCode: 400)
         case .unauthorized: .unauthorized
-        case .paymentRequired: .undocumented(statusCode: 402)
         case .forbidden: .forbidden
         case .notFound: .notFound
         case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
