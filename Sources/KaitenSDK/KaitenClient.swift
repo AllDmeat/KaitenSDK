@@ -429,6 +429,78 @@ public struct KaitenClient: Sendable {
         return try decodeResponse(response.toCase(), notFoundResource: ("card", id)) { try $0.json }
     }
 
+    /// Creates a new card on a board.
+    ///
+    /// - Parameters:
+    ///   - title: Card title (required, max 1024 characters).
+    ///   - boardId: Board ID where the card will be created (required).
+    ///   - columnId: Column ID. If omitted the board's default column is used.
+    ///   - laneId: Lane ID. If omitted the board's default lane is used.
+    ///   - description: Card description (max 32768 characters).
+    ///   - asap: ASAP marker.
+    ///   - dueDate: Deadline in ISO 8601 format.
+    ///   - dueDateTimePresent: Whether deadline includes hours and minutes.
+    ///   - sortOrder: Position in the cell.
+    ///   - expiresLater: Fixed deadline flag.
+    ///   - sizeText: Size text (e.g. "1", "S", "XL").
+    ///   - ownerId: Owner user ID.
+    ///   - responsibleId: Responsible user ID.
+    ///   - ownerEmail: Owner email address (only works if email belongs to company user).
+    ///   - position: 1 = first in cell, 2 = last in cell. Overrides sort_order if present.
+    ///   - typeId: Card type ID.
+    ///   - externalId: External identifier.
+    ///   - textFormatTypeId: 1 = markdown, 2 = html, 3 = jira wiki.
+    ///   - properties: Custom properties object.
+    /// - Returns: The created card.
+    /// - Throws: ``KaitenError``
+    public func createCard(
+        title: String,
+        boardId: Int,
+        columnId: Int? = nil,
+        laneId: Int? = nil,
+        description: String? = nil,
+        asap: Bool? = nil,
+        dueDate: String? = nil,
+        dueDateTimePresent: Bool? = nil,
+        sortOrder: Double? = nil,
+        expiresLater: Bool? = nil,
+        sizeText: String? = nil,
+        ownerId: Int? = nil,
+        responsibleId: Int? = nil,
+        ownerEmail: String? = nil,
+        position: Int? = nil,
+        typeId: Int? = nil,
+        externalId: String? = nil,
+        textFormatTypeId: Int? = nil,
+        properties: Components.Schemas.CreateCardRequest.propertiesPayload? = nil
+    ) async throws(KaitenError) -> Components.Schemas.Card {
+        let body = Components.Schemas.CreateCardRequest(
+            title: title,
+            board_id: boardId,
+            column_id: columnId,
+            lane_id: laneId,
+            description: description,
+            asap: asap,
+            due_date: dueDate,
+            due_date_time_present: dueDateTimePresent,
+            sort_order: sortOrder,
+            expires_later: expiresLater,
+            size_text: sizeText,
+            owner_id: ownerId,
+            responsible_id: responsibleId,
+            owner_email: ownerEmail,
+            position: position,
+            type_id: typeId,
+            external_id: externalId,
+            text_format_type_id: textFormatTypeId,
+            properties: properties
+        )
+        let response = try await call {
+            try await client.create_card(body: .json(body))
+        }
+        return try decodeResponse(response.toCase()) { try $0.json }
+    }
+
     /// Updates a card by its identifier.
     ///
     /// All fields in the request body are optional — only provided values are changed.
