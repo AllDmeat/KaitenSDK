@@ -155,110 +155,110 @@ public struct KaitenClient: Sendable {
         // MARK: - Date filters
 
         /// Filter cards created before this date.
-        public var createdBefore: Date?
+        public let createdBefore: Date?
         /// Filter cards created after this date.
-        public var createdAfter: Date?
+        public let createdAfter: Date?
         /// Filter cards updated before this date.
-        public var updatedBefore: Date?
+        public let updatedBefore: Date?
         /// Filter cards updated after this date.
-        public var updatedAfter: Date?
+        public let updatedAfter: Date?
         /// Filter cards first moved to in-progress after this date.
-        public var firstMovedInProgressAfter: Date?
+        public let firstMovedInProgressAfter: Date?
         /// Filter cards first moved to in-progress before this date.
-        public var firstMovedInProgressBefore: Date?
+        public let firstMovedInProgressBefore: Date?
         /// Filter cards last moved to done after this date.
-        public var lastMovedToDoneAtAfter: Date?
+        public let lastMovedToDoneAtAfter: Date?
         /// Filter cards last moved to done before this date.
-        public var lastMovedToDoneAtBefore: Date?
+        public let lastMovedToDoneAtBefore: Date?
         /// Filter cards with due date after this date.
-        public var dueDateAfter: Date?
+        public let dueDateAfter: Date?
         /// Filter cards with due date before this date.
-        public var dueDateBefore: Date?
+        public let dueDateBefore: Date?
 
         // MARK: - Text search
 
         /// Text search query.
-        public var query: String?
+        public let query: String?
         /// Comma-separated fields to search in.
-        public var searchFields: String?
+        public let searchFields: String?
 
         // MARK: - Tags
 
         /// Filter by tag name.
-        public var tag: String?
+        public let tag: String?
         /// Comma-separated tag IDs.
-        public var tagIds: String?
+        public let tagIds: String?
 
         // MARK: - ID filters
 
         /// Filter by card type ID.
-        public var typeId: Int?
+        public let typeId: Int?
         /// Comma-separated card type IDs.
-        public var typeIds: String?
+        public let typeIds: String?
         /// Comma-separated member user IDs.
-        public var memberIds: String?
+        public let memberIds: String?
         /// Filter by owner user ID.
-        public var ownerId: Int?
+        public let ownerId: Int?
         /// Comma-separated owner user IDs.
-        public var ownerIds: String?
+        public let ownerIds: String?
         /// Filter by responsible user ID.
-        public var responsibleId: Int?
+        public let responsibleId: Int?
         /// Comma-separated responsible user IDs.
-        public var responsibleIds: String?
+        public let responsibleIds: String?
         /// Comma-separated column IDs.
-        public var columnIds: String?
+        public let columnIds: String?
         /// Filter by space ID.
-        public var spaceId: Int?
+        public let spaceId: Int?
         /// Filter by external ID.
-        public var externalId: String?
+        public let externalId: String?
         /// Comma-separated organization IDs.
-        public var organizationsIds: String?
+        public let organizationsIds: String?
 
         // MARK: - Exclude filters
 
         /// Comma-separated board IDs to exclude.
-        public var excludeBoardIds: String?
+        public let excludeBoardIds: String?
         /// Comma-separated lane IDs to exclude.
-        public var excludeLaneIds: String?
+        public let excludeLaneIds: String?
         /// Comma-separated column IDs to exclude.
-        public var excludeColumnIds: String?
+        public let excludeColumnIds: String?
         /// Comma-separated owner IDs to exclude.
-        public var excludeOwnerIds: String?
+        public let excludeOwnerIds: String?
         /// Comma-separated card IDs to exclude.
-        public var excludeCardIds: String?
+        public let excludeCardIds: String?
 
         // MARK: - State filters
 
         /// Card condition: 1 = on board, 2 = archived.
-        public var condition: Int?
+        public let condition: Int?
         /// Comma-separated states: 1 = queued, 2 = in progress, 3 = done.
-        public var states: String?
+        public let states: String?
         /// Filter by archived status.
-        public var archived: Bool?
+        public let archived: Bool?
         /// Filter ASAP cards.
-        public var asap: Bool?
+        public let asap: Bool?
         /// Filter overdue cards.
-        public var overdue: Bool?
+        public let overdue: Bool?
         /// Filter cards done on time.
-        public var doneOnTime: Bool?
+        public let doneOnTime: Bool?
         /// Filter cards that have a due date.
-        public var withDueDate: Bool?
+        public let withDueDate: Bool?
         /// Filter service desk request cards.
-        public var isRequest: Bool?
+        public let isRequest: Bool?
 
         // MARK: - Sorting
 
         /// Field to order by.
-        public var orderBy: String?
+        public let orderBy: String?
         /// Order direction: asc or desc.
-        public var orderDirection: String?
+        public let orderDirection: String?
         /// Space ID for ordering context.
-        public var orderSpaceId: Int?
+        public let orderSpaceId: Int?
 
         // MARK: - Extra
 
         /// Comma-separated additional fields to include.
-        public var additionalCardFields: String?
+        public let additionalCardFields: String?
 
         /// Creates a new card filter with all fields defaulting to `nil`.
         public init(
