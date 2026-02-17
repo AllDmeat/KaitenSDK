@@ -51,6 +51,21 @@ public struct KaitenClient: Sendable {
         }
     }
 
+    /// Executes an API call for list endpoints.
+    /// Returns `nil` when Kaiten returns HTTP 200 with an empty body (no JSON),
+    /// allowing callers to fall back to an empty array.
+    private func callList<T>(_ operation: () async throws -> T) async throws(KaitenError) -> T? {
+        do {
+            return try await operation()
+        } catch let error as ClientError where error.response?.status == .ok {
+            return nil
+        } catch let error as KaitenError {
+            throw error
+        } catch {
+            throw .networkError(underlying: error)
+        }
+    }
+
     /// Decodes a value, wrapping errors into `.decodingError`.
     private func decode<T>(_ extract: () throws -> T) throws(KaitenError) -> T {
         do {
@@ -122,16 +137,8 @@ public struct KaitenClient: Sendable {
 
     /// Returns a page of cards for the given board.
     public func listCards(boardId: Int, offset: Int = 0, limit: Int = 100) async throws(KaitenError) -> Page<Components.Schemas.Card> {
-        let response: Operations.get_cards.Output
-        do {
-            response = try await client.get_cards(query: .init(board_id: boardId, offset: offset, limit: limit))
-        } catch let error as ClientError where error.response?.status == .ok {
-            // Kaiten returns HTTP 200 with empty body when a board has no cards (#84).
+        guard let response = try await callList({ try await client.get_cards(query: .init(board_id: boardId, offset: offset, limit: limit)) }) else {
             return Page(items: [], offset: offset, limit: limit)
-        } catch let error as KaitenError {
-            throw error
-        } catch {
-            throw .networkError(underlying: error)
         }
         let items: [Components.Schemas.Card] = try decodeResponse(response.toCase()) { try $0.json }
         return Page(items: items, offset: offset, limit: limit)
@@ -147,13 +154,17 @@ public struct KaitenClient: Sendable {
 
     /// Fetches the list of members for a given card.
     public func getCardMembers(cardId: Int) async throws(KaitenError) -> [Components.Schemas.MemberDetailed] {
-        let response = try await call { try await client.retrieve_list_of_card_members(path: .init(card_id: cardId)) }
+        guard let response = try await callList({ try await client.retrieve_list_of_card_members(path: .init(card_id: cardId)) }) else {
+            return []
+        }
         return try decodeResponse(response.toCase()) { try $0.json }
     }
 
     /// Fetches comments for a card.
     public func getCardComments(cardId: Int) async throws(KaitenError) -> [Components.Schemas.Comment] {
-        let response = try await call { try await client.retrieve_card_comments(path: .init(card_id: cardId)) }
+        guard let response = try await callList({ try await client.retrieve_card_comments(path: .init(card_id: cardId)) }) else {
+            return []
+        }
         return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) { try $0.json }
     }
 }
@@ -163,7 +174,9 @@ public struct KaitenClient: Sendable {
 extension KaitenClient {
     /// List all custom property definitions for the company.
     public func listCustomProperties(offset: Int = 0, limit: Int = 100) async throws(KaitenError) -> Page<Components.Schemas.CustomProperty> {
-        let response = try await call { try await client.get_list_of_properties(query: .init(offset: offset, limit: limit)) }
+        guard let response = try await callList({ try await client.get_list_of_properties(query: .init(offset: offset, limit: limit)) }) else {
+            return Page(items: [], offset: offset, limit: limit)
+        }
         let items: [Components.Schemas.CustomProperty] = try decodeResponse(response.toCase()) { try $0.json }
         return Page(items: items, offset: offset, limit: limit)
     }
@@ -186,13 +199,17 @@ extension KaitenClient {
 
     /// Fetches columns for a board.
     public func getBoardColumns(boardId: Int) async throws(KaitenError) -> [Components.Schemas.Column] {
-        let response = try await call { try await client.get_list_of_columns(path: .init(board_id: boardId)) }
+        guard let response = try await callList({ try await client.get_list_of_columns(path: .init(board_id: boardId)) }) else {
+            return []
+        }
         return try decodeResponse(response.toCase(), notFoundResource: ("board", boardId)) { try $0.json }
     }
 
     /// Fetches lanes for a board.
     public func getBoardLanes(boardId: Int) async throws(KaitenError) -> [Components.Schemas.Lane] {
-        let response = try await call { try await client.get_list_of_lanes(path: .init(board_id: boardId)) }
+        guard let response = try await callList({ try await client.get_list_of_lanes(path: .init(board_id: boardId)) }) else {
+            return []
+        }
         return try decodeResponse(response.toCase(), notFoundResource: ("board", boardId)) { try $0.json }
     }
 }
@@ -202,13 +219,17 @@ extension KaitenClient {
 extension KaitenClient {
     /// Lists all spaces.
     public func listSpaces() async throws(KaitenError) -> [Components.Schemas.Space] {
-        let response = try await call { try await client.retrieve_list_of_spaces() }
+        guard let response = try await callList({ try await client.retrieve_list_of_spaces() }) else {
+            return []
+        }
         return try decodeResponse(response.toCase()) { try $0.json }
     }
 
     /// Lists boards in a space.
     public func listBoards(spaceId: Int) async throws(KaitenError) -> [Components.Schemas.BoardInSpace] {
-        let response = try await call { try await client.get_list_of_boards(path: .init(space_id: spaceId)) }
+        guard let response = try await callList({ try await client.get_list_of_boards(path: .init(space_id: spaceId)) }) else {
+            return []
+        }
         return try decodeResponse(response.toCase(), notFoundResource: ("space", spaceId)) { try $0.json }
     }
 }
