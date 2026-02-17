@@ -641,12 +641,12 @@ components:
         children:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/Card'
           description: Child cards
         parents:
           type: array
           items:
-            type: object
+            $ref: '#/components/schemas/Card'
           description: Parent cards
         files:
           type: array
