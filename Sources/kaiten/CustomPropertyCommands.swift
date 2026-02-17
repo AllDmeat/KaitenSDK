@@ -6,15 +6,21 @@ import KaitenSDK
 struct ListCustomProperties: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "list-custom-properties",
-        abstract: "List all custom property definitions"
+        abstract: "List custom property definitions (paginated)"
     )
 
     @OptionGroup var global: GlobalOptions
 
+    @Option(name: .long, help: "Offset for pagination (default: 0)")
+    var offset: Int = 0
+
+    @Option(name: .long, help: "Limit for pagination (default/max: 100)")
+    var limit: Int = 100
+
     func run() async throws {
         let client = try await global.makeClient()
-        let props = try await client.listCustomProperties()
-        try printJSON(props)
+        let page = try await client.listCustomProperties(offset: offset, limit: limit)
+        try printJSON(page)
     }
 }
 
