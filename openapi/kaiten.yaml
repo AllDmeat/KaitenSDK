@@ -1446,7 +1446,7 @@ components:
           type: integer
           description: Comment ID
         uid:
-          type: integer
+          type: string
           description: Comment UID
         text:
           type: string
