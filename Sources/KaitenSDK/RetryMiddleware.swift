@@ -7,85 +7,86 @@ import OpenAPIRuntime
 /// - HTTP 5xx server errors with exponential backoff
 /// - Network errors (URLError) with exponential backoff
 struct RetryMiddleware: ClientMiddleware {
-    private let maxAttempts: Int
-    private let baseDelay: TimeInterval
+  private let maxAttempts: Int
+  private let baseDelay: TimeInterval
 
-    /// Creates a retry middleware.
-    /// - Parameters:
-    ///   - maxAttempts: Maximum number of attempts (default 3).
-    ///   - baseDelay: Initial backoff delay in seconds (default 1.0).
-    init(maxAttempts: Int = 3, baseDelay: TimeInterval = 1.0) {
-        self.maxAttempts = maxAttempts
-        self.baseDelay = baseDelay
-    }
+  /// Creates a retry middleware.
+  /// - Parameters:
+  ///   - maxAttempts: Maximum number of attempts (default 3).
+  ///   - baseDelay: Initial backoff delay in seconds (default 1.0).
+  init(maxAttempts: Int = 3, baseDelay: TimeInterval = 1.0) {
+    self.maxAttempts = maxAttempts
+    self.baseDelay = baseDelay
+  }
 
-    func intercept(
-        _ request: HTTPRequest,
-        body: HTTPBody?,
-        baseURL: URL,
-        operationID: String,
-        next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
-    ) async throws -> (HTTPResponse, HTTPBody?) {
-        var lastError: (any Error)?
-        var lastRetryAfter: TimeInterval?
+  func intercept(
+    _ request: HTTPRequest,
+    body: HTTPBody?,
+    baseURL: URL,
+    operationID: String,
+    next: @Sendable (HTTPRequest, HTTPBody?, URL) async throws -> (HTTPResponse, HTTPBody?)
+  ) async throws -> (HTTPResponse, HTTPBody?) {
+    var lastError: (any Error)?
+    var lastRetryAfter: TimeInterval?
 
-        for attempt in 0..<maxAttempts {
-            let response: HTTPResponse
-            let responseBody: HTTPBody?
+    for attempt in 0..<maxAttempts {
+      let response: HTTPResponse
+      let responseBody: HTTPBody?
 
-            do {
-                (response, responseBody) = try await next(request, body, baseURL)
-            } catch {
-                // Network error — retry with backoff
-                lastError = error
-                if attempt < maxAttempts - 1 {
-                    try await sleep(backoffDelay(attempt: attempt))
-                    continue
-                }
-                throw KaitenError.networkError(underlying: error)
-            }
-
-            let statusCode = response.status.code
-
-            // Success or non-retryable status
-            if statusCode == 429 {
-                let retryAfter = response.headerFields[HTTPField.Name("Retry-After")!]
-                    .flatMap(TimeInterval.init)
-                    ?? backoffDelay(attempt: attempt)
-                lastRetryAfter = retryAfter
-                if attempt < maxAttempts - 1 {
-                    try await sleep(retryAfter)
-                    continue
-                }
-                throw KaitenError.rateLimited(retryAfter: lastRetryAfter)
-            }
-
-            if (500...599).contains(statusCode) {
-                if attempt < maxAttempts - 1 {
-                    try await sleep(backoffDelay(attempt: attempt))
-                    continue
-                }
-                throw KaitenError.serverError(statusCode: statusCode, body: nil)
-            }
-
-            return (response, responseBody)
+      do {
+        (response, responseBody) = try await next(request, body, baseURL)
+      } catch {
+        // Network error — retry with backoff
+        lastError = error
+        if attempt < maxAttempts - 1 {
+          try await sleep(backoffDelay(attempt: attempt))
+          continue
         }
+        throw KaitenError.networkError(underlying: error)
+      }
 
-        // Should not reach here, but handle gracefully
-        if let lastError {
-            throw KaitenError.networkError(underlying: lastError)
+      let statusCode = response.status.code
+
+      // Success or non-retryable status
+      if statusCode == 429 {
+        let retryAfter =
+          response.headerFields[HTTPField.Name("Retry-After")!]
+          .flatMap(TimeInterval.init)
+          ?? backoffDelay(attempt: attempt)
+        lastRetryAfter = retryAfter
+        if attempt < maxAttempts - 1 {
+          try await sleep(retryAfter)
+          continue
         }
         throw KaitenError.rateLimited(retryAfter: lastRetryAfter)
+      }
+
+      if (500...599).contains(statusCode) {
+        if attempt < maxAttempts - 1 {
+          try await sleep(backoffDelay(attempt: attempt))
+          continue
+        }
+        throw KaitenError.serverError(statusCode: statusCode, body: nil)
+      }
+
+      return (response, responseBody)
     }
 
-    /// Calculates exponential backoff with jitter.
-    private func backoffDelay(attempt: Int) -> TimeInterval {
-        let exponential = baseDelay * pow(2.0, Double(attempt))
-        let jitter = Double.random(in: 0.5...1.5)
-        return exponential * jitter
+    // Should not reach here, but handle gracefully
+    if let lastError {
+      throw KaitenError.networkError(underlying: lastError)
     }
+    throw KaitenError.rateLimited(retryAfter: lastRetryAfter)
+  }
 
-    private func sleep(_ duration: TimeInterval) async throws {
-        try await Task.sleep(for: .seconds(duration))
-    }
+  /// Calculates exponential backoff with jitter.
+  private func backoffDelay(attempt: Int) -> TimeInterval {
+    let exponential = baseDelay * pow(2.0, Double(attempt))
+    let jitter = Double.random(in: 0.5...1.5)
+    return exponential * jitter
+  }
+
+  private func sleep(_ duration: TimeInterval) async throws {
+    try await Task.sleep(for: .seconds(duration))
+  }
 }

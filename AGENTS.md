@@ -60,3 +60,15 @@ Detailed guide for parsing Kaiten API documentation: [docs/kaiten-docs-parsing.m
 - Whether pagination is supported (`offset`/`limit`)
 
 Do not modify the spec based on guesses or empirical data. Only based on documentation.
+
+## Code Formatting
+
+This project uses [swift-format](https://github.com/swiftlang/swift-format) (bundled with the Swift toolchain) with default configuration.
+
+**Before every commit**, run:
+
+```bash
+swift format format --in-place --recursive Sources/ Tests/
+```
+
+CI runs `swift format lint --strict --recursive Sources/ Tests/` on every PR. Unformatted code will fail the lint check.
