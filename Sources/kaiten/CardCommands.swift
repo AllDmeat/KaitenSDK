@@ -247,6 +247,27 @@ struct GetCardComments: AsyncParsableCommand {
     }
 }
 
+struct CreateComment: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "create-comment",
+        abstract: "Add a comment to a card"
+    )
+
+    @OptionGroup var global: GlobalOptions
+
+    @Option(name: .long, help: "Card ID")
+    var cardId: Int
+
+    @Option(name: .long, help: "Comment text (markdown)")
+    var text: String
+
+    func run() async throws {
+        let client = try await global.makeClient()
+        let comment = try await client.createComment(cardId: cardId, text: text)
+        try printJSON(comment)
+    }
+}
+
 struct GetCardMembers: AsyncParsableCommand {
     static let configuration = CommandConfiguration(
         commandName: "get-card-members",
@@ -262,5 +283,26 @@ struct GetCardMembers: AsyncParsableCommand {
         let client = try await global.makeClient()
         let members = try await client.getCardMembers(cardId: cardId)
         try printJSON(members)
+    }
+}
+
+struct AddComment: AsyncParsableCommand {
+    static let configuration = CommandConfiguration(
+        commandName: "add-comment",
+        abstract: "Create a comment on a card"
+    )
+
+    @OptionGroup var global: GlobalOptions
+
+    @Option(name: .long, help: "Card ID")
+    var cardId: Int
+
+    @Option(name: .long, help: "Comment text (markdown)")
+    var text: String
+
+    func run() async throws {
+        let client = try await global.makeClient()
+        let comment = try await client.createComment(cardId: cardId, text: text)
+        try printJSON(comment)
     }
 }

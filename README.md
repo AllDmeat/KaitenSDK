@@ -108,6 +108,8 @@ Every command accepts `--url` and `--token` flags to override the config file.
 | `get-board-lanes` | `--board-id` | Get lanes of a board |
 | `list-cards` | `--board-id` | List all cards on a board |
 | `get-card` | `--id` | Get a card by ID |
+| `get-card-comments` | `--card-id` | Get comments on a card |
+| `add-comment` | `--card-id`, `--text` | Add a comment to a card |
 | `get-card-members` | `--card-id` | Get members of a card |
 | `list-custom-properties` | — | List all custom property definitions |
 | `get-custom-property` | `--id` | Get a custom property by ID |
@@ -120,6 +122,8 @@ All output is pretty-printed JSON.
 |--------|-------------|
 | `getCard(id:)` | Fetch a single card by ID |
 | `listCards(boardId:)` | List all cards on a board |
+| `getCardComments(cardId:)` | Get comments on a card |
+| `createComment(cardId:text:)` | Add a comment to a card |
 | `getCardMembers(cardId:)` | Get members of a card |
 | `listCustomProperties()` | List all custom property definitions |
 | `getCustomProperty(id:)` | Get a single custom property definition |

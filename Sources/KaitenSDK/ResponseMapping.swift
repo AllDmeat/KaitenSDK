@@ -50,6 +50,18 @@ extension Operations.retrieve_card_comments.Output {
     }
 }
 
+extension Operations.create_card_comment.Output {
+    func toCase() -> KaitenClient.ResponseCase<Operations.create_card_comment.Output.Ok.Body> {
+        switch self {
+        case .ok(let ok): .ok(ok.body)
+        case .unauthorized: .unauthorized
+        case .forbidden: .forbidden
+        case .notFound: .notFound
+        case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+        }
+    }
+}
+
 // MARK: - Custom Properties
 
 extension Operations.get_list_of_properties.Output {
