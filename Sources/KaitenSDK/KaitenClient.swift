@@ -139,11 +139,12 @@ public struct KaitenClient: Sendable {
 
 extension KaitenClient {
     /// List all custom property definitions for the company.
-    public func listCustomProperties() async throws(KaitenError) -> [Components.Schemas.CustomProperty] {
-        let response = try await call { try await client.get_list_of_properties() }
+    public func listCustomProperties(offset: Int = 0, limit: Int = 100) async throws(KaitenError) -> Page<Components.Schemas.CustomProperty> {
+        let response = try await call { try await client.get_list_of_properties(query: .init(offset: offset, limit: limit)) }
         switch response {
         case .ok(let ok):
-            return try decode { try ok.body.json }
+            let items = try decode { try ok.body.json }
+            return Page(items: items, offset: offset, limit: limit)
         case .unauthorized(_):
             throw .unauthorized
         case .forbidden(_):

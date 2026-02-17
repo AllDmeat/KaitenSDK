@@ -179,6 +179,17 @@ paths:
     get:
       summary: Get list of properties
       operationId: get_list_of_properties
+      parameters:
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum number of properties to return
       responses:
         '200':
           description: success
