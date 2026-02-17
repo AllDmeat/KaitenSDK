@@ -68,9 +68,12 @@ struct GetBoardLanes: AsyncParsableCommand {
     @Option(name: .long, help: "Board ID")
     var boardId: Int
 
+    @Option(name: .long, help: "Lane condition: 1 = live, 2 = archived, 3 = deleted")
+    var condition: Int?
+
     func run() async throws {
         let client = try await global.makeClient()
-        let lanes = try await client.getBoardLanes(boardId: boardId)
+        let lanes = try await client.getBoardLanes(boardId: boardId, condition: condition)
         try printJSON(lanes)
     }
 }
