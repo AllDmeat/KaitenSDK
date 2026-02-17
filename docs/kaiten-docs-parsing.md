@@ -1,11 +1,11 @@
-# Парсинг документации Kaiten API
+# Parsing Kaiten API Documentation
 
-## Проблема
-Документация Kaiten (https://developers.kaiten.ru) — SPA на JavaScript. `web_fetch` не работает (возвращает пустую страницу). Нужен реальный браузер.
+## Problem
+The Kaiten documentation (https://developers.kaiten.ru) is a JavaScript SPA. `web_fetch` does not work (returns an empty page). A real browser is needed.
 
-## Как парсить
+## How to Parse
 
-### 1. Используй Playwright (Python)
+### 1. Use Playwright (Python)
 ```python
 from playwright.sync_api import sync_playwright
 
@@ -13,16 +13,16 @@ with sync_playwright() as p:
     browser = p.chromium.launch(headless=True, args=['--no-sandbox'])
     page = browser.new_page()
     page.goto(url, wait_until='networkidle', timeout=30000)
-    page.wait_for_timeout(3000)  # SPA нужно время на рендер
+    page.wait_for_timeout(3000)  # SPA needs time to render
     content = page.text_content('body')
     browser.close()
 ```
 
-### 2. Структура URL
+### 2. URL Structure
 ```
 https://developers.kaiten.ru/{section}/{action}
 ```
-Примеры:
+Examples:
 - `https://developers.kaiten.ru/columns/get-list-of-columns`
 - `https://developers.kaiten.ru/lanes/get-list-of-lanes`
 - `https://developers.kaiten.ru/space-boards/get-list-of-boards`
@@ -31,57 +31,57 @@ https://developers.kaiten.ru/{section}/{action}
 - `https://developers.kaiten.ru/cards/retrieve-card`
 - `https://developers.kaiten.ru/spaces/retrieve-list-of-spaces`
 
-### 3. Структура контента на странице (text_content)
-Страница возвращает **сплошной текст** без разделителей. Структура:
+### 3. Page Content Structure (text_content)
+The page returns **continuous text** without delimiters. Structure:
 ```
-[Навигация (сайдбар)]...[Название эндпоинта]GET|POST|...[URL шаблон]
+[Navigation (sidebar)]...[Endpoint name]GET|POST|...[URL template]
 Path parameters → Name | Type | Reference | Description
 Query → Name | Type | Constraints | Description
 Responses → 200 | 401 | 403 | 404
 Response Attributes → Name | Type | Description
-[Примеры curl/node/php]
-[Футер]
+[Examples curl/node/php]
+[Footer]
 ```
 
-### 4. Как находить нужную секцию
+### 4. How to Find the Needed Section
 ```python
-# Найти начало описания эндпоинта
+# Find the start of endpoint description
 idx = content.find('Path parameters')
-# или
-idx = content.find('Query')  # для query params
-# или
-idx = content.find('Response Attributes')  # для полей ответа
+# or
+idx = content.find('Query')  # for query params
+# or
+idx = content.find('Response Attributes')  # for response fields
 
-# Вырезать кусок вокруг
+# Extract a chunk around it
 section = content[max(0, idx-100) : idx+2000]
 ```
 
-### 5. Как определить наличие пагинации
-Искать в Query parameters секции:
-- `offset` + `limit` — классическая пагинация Kaiten
-- Если их нет — эндпоинт возвращает всё одним запросом
+### 5. How to Determine Pagination Support
+Look in the Query parameters section:
+- `offset` + `limit` — classic Kaiten pagination
+- If absent — the endpoint returns everything in a single request
 
-### 6. Как определить обязательность полей
-В Response Attributes тип поля указывает на nullable:
-- `string`, `integer`, `boolean` — **обязательное** (non-null)
-- `null | string`, `null | integer`, `null | array`, `null | object` — **опциональное** (nullable)
-- `enum` — обязательное, значения описаны в Description (например `1-queued, 2-inProgress, 3-done`)
+### 6. How to Determine Field Requiredness
+In Response Attributes, the field type indicates nullability:
+- `string`, `integer`, `boolean` — **required** (non-null)
+- `null | string`, `null | integer`, `null | array`, `null | object` — **optional** (nullable)
+- `enum` — required, values are described in Description (e.g. `1-queued, 2-inProgress, 3-done`)
 
-Примеры из GET /cards:
-- `id` → `integer` → обязательное
-- `title` → `string` → обязательное
-- `description` → `null | string` → опциональное
-- `due_date` → `null | string` → опциональное
-- `archived` → `boolean` → обязательное
-- `properties` → `null | object` → опциональное
-- `parents_ids` → `null | array` → опциональное
+Examples from GET /cards:
+- `id` → `integer` → required
+- `title` → `string` → required
+- `description` → `null | string` → optional
+- `due_date` → `null | string` → optional
+- `archived` → `boolean` → required
+- `properties` → `null | object` → optional
+- `parents_ids` → `null | array` → optional
 
-В Path parameters поле помечено `required` явно (например `board_id required integer`).
-В Query parameters `required` указан как constraint, если не указан — параметр опциональный.
+In Path parameters, a field is marked `required` explicitly (e.g. `board_id required integer`).
+In Query parameters, `required` is indicated as a constraint; if not indicated — the parameter is optional.
 
-### 7. Раскрытие вложенных схем (Schema buttons)
+### 7. Expanding Nested Schemas (Schema Buttons)
 
-Поля с типом `object Schema` или `array Schema` имеют кнопку **Schema** (MUI Button), которая открывает **модальное окно** (MUI Dialog) с описанием вложенных полей. `text_content('body')` **НЕ** показывает содержимое этих схем — нужно кликнуть по кнопке и прочитать диалог.
+Fields with type `object Schema` or `array Schema` have a **Schema** button (MUI Button) that opens a **modal dialog** (MUI Dialog) with nested field descriptions. `text_content('body')` does **NOT** show the contents of these schemas — you need to click the button and read the dialog.
 
 ```python
 from playwright.sync_api import sync_playwright
@@ -92,12 +92,12 @@ with sync_playwright() as p:
     page.goto(url, wait_until='networkidle', timeout=30000)
     page.wait_for_timeout(3000)
 
-    # Найти все кнопки Schema
+    # Find all Schema buttons
     buttons = page.query_selector_all('button.MuiButton-root')
     schema_buttons = [b for b in buttons if b.text_content().strip() == 'Schema']
 
     for btn in schema_buttons:
-        # Имя поля из строки таблицы
+        # Field name from the table row
         field_info = btn.evaluate(
             'el => el.closest("tr")?.textContent || "unknown"'
         )
@@ -105,57 +105,57 @@ with sync_playwright() as p:
         btn.click(timeout=3000)
         page.wait_for_timeout(1000)
 
-        # Прочитать содержимое диалога
+        # Read the dialog contents
         dialog = page.query_selector('.MuiDialog-root')
         if dialog:
             schema_text = dialog.text_content()
             print(f"{field_info}: {schema_text}")
 
-            # Закрыть диалог перед следующим кликом
+            # Close the dialog before the next click
             page.keyboard.press('Escape')
             page.wait_for_timeout(500)
 
     browser.close()
 ```
 
-**Важно:**
-- Диалог блокирует клики по остальным элементам — **обязательно закрывать** через `Escape` перед переходом к следующей кнопке
-- Вложенные схемы могут содержать свои кнопки Schema (рекурсивные типы, например `children` → Card)
-- Формат текста в диалоге: `FieldNameType: typeNameTypeDescriptionfield1type1desc1field2type2desc2...`
+**Important:**
+- The dialog blocks clicks on other elements — **must close** via `Escape` before moving to the next button
+- Nested schemas may contain their own Schema buttons (recursive types, e.g. `children` → Card)
+- Text format in the dialog: `FieldNameType: typeNameTypeDescriptionfield1type1desc1field2type2desc2...`
 
-#### Вложенные схемы внутри диалога (MuiLink)
+#### Nested Schemas Inside the Dialog (MuiLink)
 
-Внутри раскрытого диалога поля с типом `array` или `object` могут быть **кликабельными ссылками** (не кнопками Schema, а сам текст типа). Это `button` с классом `MuiLink-root` — клик по ней заменяет содержимое диалога на вложенную схему.
+Inside an opened dialog, fields with type `array` or `object` may be **clickable links** (not Schema buttons, but the type text itself). These are `button` elements with class `MuiLink-root` — clicking them replaces the dialog content with the nested schema.
 
-Пример: `checklists` → Schema → внутри поле `items` с типом `array` → клик по `array` → раскрывается схема ChecklistItem.
+Example: `checklists` → Schema → inside, field `items` with type `array` → click `array` → the ChecklistItem schema is revealed.
 
 ```python
-# После открытия основного диалога Schema:
+# After opening the main Schema dialog:
 dialog = page.query_selector('.MuiDialog-root')
 if dialog:
-    # Найти кликабельные типы внутри диалога
+    # Find clickable types inside the dialog
     link_buttons = dialog.query_selector_all('button.MuiLink-root')
     for lb in link_buttons:
         text = lb.text_content().strip()
-        # text будет "array", "object" и т.п.
+        # text will be "array", "object", etc.
         lb.click(timeout=3000)
         page.wait_for_timeout(1000)
 
-        # Диалог обновился — читаем новое содержимое
+        # Dialog updated — read new content
         dialog = page.query_selector('.MuiDialog-root')
         nested_text = dialog.text_content()
         print(nested_text)
 
-        # В диалоге есть кнопка "Back" для возврата к родительской схеме
+        # The dialog has a "Back" button to return to the parent schema
         page.keyboard.press('Escape')
         page.wait_for_timeout(500)
 ```
 
-**Как отличить:**
-- Кнопки **Schema** на странице (вне диалога): `button.MuiButton-root` с текстом `Schema`
-- Ссылки на вложенные схемы **внутри диалога**: `button.MuiLink-root` с текстом типа (`array`, `object`)
+**How to distinguish:**
+- **Schema** buttons on the page (outside the dialog): `button.MuiButton-root` with text `Schema`
+- Links to nested schemas **inside the dialog**: `button.MuiLink-root` with type text (`array`, `object`)
 
-### 8. Batch-парсинг нескольких эндпоинтов
+### 8. Batch Parsing Multiple Endpoints
 ```python
 urls = {
     'columns': 'https://developers.kaiten.ru/columns/get-list-of-columns',
@@ -169,14 +169,14 @@ with sync_playwright() as p:
     for name, url in urls.items():
         page.goto(url, wait_until='networkidle', timeout=30000)
         content = page.text_content('body')
-        # парсим нужные секции
+        # parse the needed sections
     browser.close()
 ```
 
-### 9. Важные нюансы
-- **Один браузер, много page.goto()** — не создавай новый браузер на каждый URL
-- **wait_for_timeout(3000)** — иногда нужен после networkidle для полного рендера
-- **text_content('body')** — возвращает весь текст без HTML тегов
-- Chromium установлен через `playwright install chromium`
-- Запуск обязательно с `args=['--no-sandbox']` (мы под root)
-- Playwright установлен: `pip install --break-system-packages playwright && playwright install chromium`
+### 9. Important Notes
+- **One browser, many page.goto()** — don't create a new browser for each URL
+- **wait_for_timeout(3000)** — sometimes needed after networkidle for full rendering
+- **text_content('body')** — returns all text without HTML tags
+- Chromium is installed via `playwright install chromium`
+- Must run with `args=['--no-sandbox']` (we're running as root)
+- Playwright is installed: `pip install --break-system-packages playwright && playwright install chromium`

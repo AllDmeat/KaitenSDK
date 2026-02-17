@@ -4,57 +4,57 @@
 
 ### I. OpenAPI-First
 
-OpenAPI-спека — единственный источник правды для API-контракта.
-Клиентский код генерируется из неё. Ручной код HTTP-запросов
-запрещён.
+The OpenAPI spec is the single source of truth for the API contract.
+Client code is generated from it. Hand-written HTTP request code
+is prohibited.
 
 ### II. Generated Over Handwritten
 
-Предпочитаем генерацию кода ручному написанию. Если что-то можно
-сгенерировать из спеки — генерируем. Обёртки поверх сгенерированного
-кода MUST быть минимальными и служить исключительно удобству API.
+Prefer code generation over hand-writing. If something can be
+generated from the spec — generate it. Wrappers over generated
+code MUST be minimal and serve solely for API convenience.
 
 ### III. Configuration as Code
 
-Настройки — через конфиг-файлы или аргументы.
-Захардкоженные значения запрещены.
+Settings — via config files or arguments.
+Hard-coded values are prohibited.
 
 ### IV. Simplicity
 
-YAGNI. Реализуем только то, что нужно прямо сейчас.
-Новые эндпоинты добавляются в OpenAPI-спеку → клиент
-перегенерируется автоматически. Преждевременные абстракции запрещены.
+YAGNI. Implement only what is needed right now.
+New endpoints are added to the OpenAPI spec → the client
+is regenerated automatically. Premature abstractions are prohibited.
 
 ## Quality Gates
 
-- CI MUST проходить
-- OpenAPI-спека MUST быть валидна
-- Сгенерированный код MUST компилироваться без ошибок
-- Тесты MUST проходить
+- CI MUST pass
+- OpenAPI spec MUST be valid
+- Generated code MUST compile without errors
+- Tests MUST pass
 
 ## Governance
 
-Конституция имеет приоритет над всеми другими практиками проекта.
+The constitution takes priority over all other project practices.
 
 ### Amendment Procedure
 
-1. Предложение изменения оформляется с обоснованием.
-2. Изменение документируется в этом файле.
-3. Версия обновляется по правилам семантического версионирования.
+1. A change proposal is submitted with justification.
+2. The change is documented in this file.
+3. The version is updated following semantic versioning rules.
 
 ### Versioning Policy
 
-- **MAJOR**: обратно несовместимые изменения принципов (удаление,
-  переопределение).
-- **MINOR**: добавление нового принципа или существенное расширение
-  существующего раздела.
-- **PATCH**: уточнения формулировок, исправление опечаток,
-  несемантические правки.
+- **MAJOR**: backward-incompatible changes to principles (removal,
+  redefinition).
+- **MINOR**: addition of a new principle or significant expansion
+  of an existing section.
+- **PATCH**: wording clarifications, typo fixes,
+  non-semantic edits.
 
 ### Compliance Review
 
-- Каждый PR MUST проверяться на соответствие принципам конституции.
-- Нарушения допустимы только с явным обоснованием в Complexity
-  Tracking секции плана.
+- Every PR MUST be reviewed for compliance with constitution principles.
+- Violations are acceptable only with explicit justification in the
+  Complexity Tracking section of the plan.
 
 **Version**: 2.0.0 | **Ratified**: 2026-02-14 | **Last Amended**: 2026-02-16

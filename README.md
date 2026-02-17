@@ -48,7 +48,7 @@ let card = try await client.getCard(id: 123)
 
 #### mise (recommended)
 
-[mise](https://mise.jdx.dev) — менеджер инструментов. Установит нужную версию автоматически:
+[mise](https://mise.jdx.dev) — a tool version manager. It will install the required version automatically:
 
 ```bash
 mise use -g ubi:AllDmeat/KaitenSDK --rename kaiten
@@ -56,13 +56,13 @@ mise use -g ubi:AllDmeat/KaitenSDK --rename kaiten
 
 #### GitHub Release
 
-Скачайте бинарь для вашей платформы со [страницы релизов](https://github.com/AllDmeat/KaitenSDK/releases).
+Download the binary for your platform from the [releases page](https://github.com/AllDmeat/KaitenSDK/releases).
 
-#### Из исходников
+#### From Source
 
 ```bash
 swift build -c release
-# Бинарь: .build/release/kaiten
+# Binary: .build/release/kaiten
 ```
 
 ### As a CLI
