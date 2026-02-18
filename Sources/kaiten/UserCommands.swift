@@ -55,3 +55,4 @@ struct GetCurrentUser: AsyncParsableCommand {
     try printJSON(user)
   }
 }
+
