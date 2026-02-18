@@ -32,6 +32,8 @@ struct Kaiten: AsyncParsableCommand {
       ListCustomProperties.self,
       GetCustomProperty.self,
       GetChecklist.self,
+      ListUsers.self,
+      GetCurrentUser.self,
     ]
   )
 }
