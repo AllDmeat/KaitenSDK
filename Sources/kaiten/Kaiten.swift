@@ -49,6 +49,11 @@ struct Kaiten: AsyncParsableCommand {
       CreateCardBlocker.self,
       UpdateCardBlocker.self,
       DeleteCardBlocker.self,
+      CreateTimeLog.self,
+      ListTimeLogs.self,
+      ListCardTypes.self,
+      ListSprints.self,
+      GetCardHistory.self,
     ]
   )
 }

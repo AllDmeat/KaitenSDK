@@ -1401,6 +1401,95 @@ extension KaitenClient {
   }
 }
 
+// MARK: - Time Logs
+
+extension KaitenClient {
+  /// Creates a time log on a card.
+  public func createTimeLog(
+    cardId: Int, roleId: Int, timeSpent: Int, forDate: String, comment: String? = nil
+  ) async throws(KaitenError) -> Components.Schemas.TimeLog {
+    let response = try await call {
+      try await client.create_time_log(
+        path: .init(card_id: cardId),
+        body: .json(
+          .init(role_id: roleId, time_spent: timeSpent, for_date: forDate, comment: comment))
+      )
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) { try $0.json }
+  }
+
+  /// Lists time logs for a card.
+  public func listTimeLogs(
+    cardId: Int, forDate: String? = nil, personal: Bool? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.TimeLog] {
+    guard
+      let response = try await callList({
+        try await client.list_time_logs(
+          path: .init(card_id: cardId),
+          query: .init(for_date: forDate, personal: personal)
+        )
+      })
+    else {
+      return []
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) { try $0.json }
+  }
+}
+
+// MARK: - Card Types
+
+extension KaitenClient {
+  /// Lists card types.
+  public func listCardTypes(
+    limit: Int? = nil, offset: Int? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.CardType] {
+    guard
+      let response = try await callList({
+        try await client.list_card_types(query: .init(limit: limit, offset: offset))
+      })
+    else {
+      return []
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
+  }
+}
+
+// MARK: - Sprints
+
+extension KaitenClient {
+  /// Lists sprints.
+  public func listSprints(
+    active: Bool? = nil, limit: Int? = nil, offset: Int? = nil
+  ) async throws(KaitenError) -> [Components.Schemas.Sprint] {
+    guard
+      let response = try await callList({
+        try await client.list_sprints(query: .init(active: active, limit: limit, offset: offset))
+      })
+    else {
+      return []
+    }
+    return try decodeResponse(response.toCase()) { try $0.json }
+  }
+}
+
+// MARK: - Card Location History
+
+extension KaitenClient {
+  /// Gets card location history.
+  public func getCardLocationHistory(
+    cardId: Int
+  ) async throws(KaitenError) -> [Components.Schemas.CardLocationHistory] {
+    guard
+      let response = try await callList({
+        try await client.get_card_location_history(path: .init(card_id: cardId))
+      })
+    else {
+      return []
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) { try $0.json }
+  }
+}
+
 // MARK: - Helpers
 
 extension Optional {
