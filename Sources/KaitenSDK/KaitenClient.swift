@@ -689,6 +689,38 @@ public struct KaitenClient: Sendable {
     }
     return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) { try $0.json }
   }
+  // MARK: - Delete Card
+
+  /// Deletes a card.
+  ///
+  /// - Parameter id: The card identifier.
+  /// - Returns: The deleted card.
+  public func deleteCard(id: Int) async throws(KaitenError) -> Components.Schemas.Card {
+    let response = try await call {
+      try await client.delete_card(path: .init(card_id: id))
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("card", id)) { try $0.json }
+  }
+
+  // MARK: - Delete Comment
+
+  /// Deletes a comment from a card.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - commentId: The comment identifier.
+  /// - Returns: The deleted comment ID.
+  public func deleteComment(cardId: Int, commentId: Int) async throws(KaitenError) -> Int {
+    let response = try await call {
+      try await client.delete_card_comment(
+        path: .init(card_id: cardId, comment_id: commentId))
+    }
+    let result: Components.Schemas.DeletedCommentResponse = try decodeResponse(
+      response.toCase(), notFoundResource: ("comment", commentId)
+    ) { try $0.json }
+    return result.id!
+  }
+
   // MARK: - Checklists
 
   /// Creates a checklist on a card.
