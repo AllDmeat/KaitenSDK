@@ -641,6 +641,41 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+    patch:
+      summary: Update checklist
+      operationId: update_checklist
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Checklist ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateChecklistRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checklist'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /cards/{card_id}/checklists/{checklist_id}/items/{id}:
     patch:
       summary: Update checklist item
@@ -1651,6 +1686,21 @@ components:
           - string
           - 'null'
           description: Calculation method
+    UpdateChecklistRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 1024
+          description: Checklist name
+        sort_order:
+          type: number
+          exclusiveMinimum: 0
+          description: Position
+        card_id:
+          type: integer
+          description: Move checklist to another card
     CreateCommentRequest:
       type: object
       required:

@@ -70,6 +70,42 @@ struct RemoveChecklist: AsyncParsableCommand {
   }
 }
 
+struct UpdateChecklist: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "update-checklist",
+    abstract: "Update a card checklist"
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Card ID")
+  var cardId: Int
+
+  @Option(name: .long, help: "Checklist ID")
+  var checklistId: Int
+
+  @Option(name: .long, help: "New checklist name")
+  var name: String?
+
+  @Option(name: .long, help: "New sort order")
+  var sortOrder: Double?
+
+  @Option(name: .long, help: "Move checklist to another card (card ID)")
+  var moveToCardId: Int?
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let checklist = try await client.updateChecklist(
+      cardId: cardId,
+      checklistId: checklistId,
+      name: name,
+      sortOrder: sortOrder,
+      moveToCardId: moveToCardId
+    )
+    try printJSON(checklist)
+  }
+}
+
 // MARK: - Checklist Items
 
 struct UpdateChecklistItem: AsyncParsableCommand {

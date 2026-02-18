@@ -807,6 +807,43 @@ extension KaitenClient {
   }
 }
 
+// MARK: - Update Checklist
+
+extension KaitenClient {
+  /// Updates a checklist.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - checklistId: The checklist identifier.
+  ///   - name: New checklist name (1–1024 characters).
+  ///   - sortOrder: New position.
+  ///   - moveToCardId: Move checklist to another card.
+  /// - Returns: The updated checklist object.
+  /// - Throws: ``KaitenError/notFound(resource:id:)`` if the card or checklist does not exist.
+  public func updateChecklist(
+    cardId: Int,
+    checklistId: Int,
+    name: String? = nil,
+    sortOrder: Double? = nil,
+    moveToCardId: Int? = nil
+  ) async throws(KaitenError) -> Components.Schemas.Checklist {
+    let response = try await call {
+      try await client.update_checklist(
+        path: .init(card_id: cardId, id: checklistId),
+        body: .json(
+          .init(
+            name: name,
+            sort_order: sortOrder,
+            card_id: moveToCardId
+          ))
+      )
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("checklist", checklistId)) {
+      try $0.json
+    }
+  }
+}
+
 // MARK: - Custom Properties
 
 extension KaitenClient {
