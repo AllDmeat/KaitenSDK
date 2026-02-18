@@ -2275,7 +2275,7 @@ components:
           description: Last updater user ID
         size:
           type:
-          - integer
+          - number
           - 'null'
           description: Card size
         size_unit:
