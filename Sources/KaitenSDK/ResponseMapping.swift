@@ -127,6 +127,30 @@ extension Operations.get_checklist.Output {
   }
 }
 
+extension Operations.delete_card.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_card.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
+extension Operations.delete_card_comment.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.delete_card_comment.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 extension Operations.remove_checklist.Output {
   func toCase() -> KaitenClient.ResponseCase<Operations.remove_checklist.Output.Ok.Body> {
     switch self {

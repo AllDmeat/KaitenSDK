@@ -504,3 +504,42 @@ struct AddComment: AsyncParsableCommand {
     try printJSON(comment)
   }
 }
+
+struct DeleteCard: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "delete-card",
+    abstract: "Delete a card"
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Card ID")
+  var cardId: Int
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let card = try await client.deleteCard(id: cardId)
+    try printJSON(card)
+  }
+}
+
+struct DeleteComment: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "delete-comment",
+    abstract: "Delete a comment from a card"
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Card ID")
+  var cardId: Int
+
+  @Option(name: .long, help: "Comment ID")
+  var commentId: Int
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let deletedId = try await client.deleteComment(cardId: cardId, commentId: commentId)
+    try printJSON(["id": deletedId])
+  }
+}
