@@ -245,10 +245,10 @@ public struct KaitenClient: Sendable {
 
     // MARK: - State filters
 
-    /// Card condition: 1 = on board, 2 = archived.
-    public let condition: Int?
-    /// Comma-separated states: 1 = queued, 2 = in progress, 3 = done.
-    public let states: String?
+    /// Card condition filter.
+    public let condition: CardCondition?
+    /// Card workflow states to include.
+    public let states: [CardState]?
     /// Filter by archived status.
     public let archived: Bool?
     /// Filter ASAP cards.
@@ -308,8 +308,8 @@ public struct KaitenClient: Sendable {
       excludeColumnIds: String? = nil,
       excludeOwnerIds: String? = nil,
       excludeCardIds: String? = nil,
-      condition: Int? = nil,
-      states: String? = nil,
+      condition: CardCondition? = nil,
+      states: [CardState]? = nil,
       archived: Bool? = nil,
       asap: Bool? = nil,
       overdue: Bool? = nil,
@@ -418,8 +418,8 @@ public struct KaitenClient: Sendable {
       exclude_column_ids: f?.excludeColumnIds,
       exclude_owner_ids: f?.excludeOwnerIds,
       exclude_card_ids: f?.excludeCardIds,
-      condition: f?.condition,
-      states: f?.states,
+      condition: f?.condition?.rawValue,
+      states: f?.states.map { $0.map { String($0.rawValue) }.joined(separator: ",") },
       archived: f?.archived,
       asap: f?.asap,
       overdue: f?.overdue,
@@ -466,10 +466,10 @@ public struct KaitenClient: Sendable {
   ///   - ownerId: Owner user ID.
   ///   - responsibleId: Responsible user ID.
   ///   - ownerEmail: Owner email address (only works if email belongs to company user).
-  ///   - position: 1 = first in cell, 2 = last in cell. Overrides sort_order if present.
+  ///   - position: Card position in cell. Overrides sort_order if present.
   ///   - typeId: Card type ID.
   ///   - externalId: External identifier.
-  ///   - textFormatTypeId: 1 = markdown, 2 = html, 3 = jira wiki.
+  ///   - textFormatTypeId: Text format for card description.
   ///   - properties: Custom properties object.
   /// - Returns: The created card.
   /// - Throws: ``KaitenError``
@@ -488,10 +488,10 @@ public struct KaitenClient: Sendable {
     ownerId: Int? = nil,
     responsibleId: Int? = nil,
     ownerEmail: String? = nil,
-    position: Int? = nil,
+    position: CardPosition? = nil,
     typeId: Int? = nil,
     externalId: String? = nil,
-    textFormatTypeId: Int? = nil,
+    textFormatTypeId: TextFormatType? = nil,
     properties: Components.Schemas.CreateCardRequest.propertiesPayload? = nil
   ) async throws(KaitenError) -> Components.Schemas.Card {
     let body = Components.Schemas.CreateCardRequest(
@@ -509,10 +509,10 @@ public struct KaitenClient: Sendable {
       owner_id: ownerId,
       responsible_id: responsibleId,
       owner_email: ownerEmail,
-      position: position,
+      position: position?.rawValue,
       type_id: typeId,
       external_id: externalId,
-      text_format_type_id: textFormatTypeId,
+      text_format_type_id: textFormatTypeId?.rawValue,
       properties: properties
     )
     let response = try await call {
@@ -542,9 +542,9 @@ public struct KaitenClient: Sendable {
   ///   - typeId: Card type ID.
   ///   - serviceId: Service ID.
   ///   - blocked: Send `false` to release all blocks.
-  ///   - condition: 1 = live, 2 = archived.
+  ///   - condition: Card condition (on board or archived).
   ///   - externalId: External identifier.
-  ///   - textFormatTypeId: 1 = markdown, 2 = html, 3 = jira wiki.
+  ///   - textFormatTypeId: Text format for card description.
   ///   - sdNewComment: Service Desk new comment flag.
   ///   - ownerEmail: Owner email address.
   ///   - prevCardId: Previous card ID for repositioning.
@@ -569,9 +569,9 @@ public struct KaitenClient: Sendable {
     typeId: Int? = nil,
     serviceId: Int? = nil,
     blocked: Bool? = nil,
-    condition: Int? = nil,
+    condition: CardCondition? = nil,
     externalId: String? = nil,
-    textFormatTypeId: Int? = nil,
+    textFormatTypeId: TextFormatType? = nil,
     sdNewComment: Bool? = nil,
     ownerEmail: String? = nil,
     prevCardId: Int? = nil,
@@ -594,9 +594,9 @@ public struct KaitenClient: Sendable {
       type_id: typeId,
       service_id: serviceId,
       blocked: blocked,
-      condition: condition,
+      condition: condition?.rawValue,
       external_id: externalId,
-      text_format_type_id: textFormatTypeId,
+      text_format_type_id: textFormatTypeId?.rawValue,
       sd_new_comment: sdNewComment,
       owner_email: ownerEmail,
       prev_card_id: prevCardId,
@@ -658,16 +658,17 @@ public struct KaitenClient: Sendable {
   /// - Parameters:
   ///   - cardId: The card identifier.
   ///   - userId: The user identifier.
-  ///   - type: The role type (2 = responsible).
+  ///   - type: The member role type.
   /// - Returns: The updated card member role.
   /// - Throws: ``KaitenError``
-  public func updateCardMemberRole(cardId: Int, userId: Int, type: Int) async throws(KaitenError)
+  public func updateCardMemberRole(cardId: Int, userId: Int, type: CardMemberRoleType)
+    async throws(KaitenError)
     -> Components.Schemas.CardMemberRole
   {
     let response = try await call {
       try await client.update_card_member_role(
         path: .init(card_id: cardId, id: userId),
-        body: .json(.init(_type: type))
+        body: .json(.init(_type: type.rawValue))
       )
     }
     return try decodeResponse(response.toCase(), notFoundResource: ("member", userId)) {
@@ -1166,16 +1167,16 @@ extension KaitenClient {
   ///
   /// - Parameters:
   ///   - boardId: The board identifier.
-  ///   - condition: Optional lane condition filter: 1 = live, 2 = archived, 3 = deleted.
+  ///   - condition: Optional lane condition filter.
   /// - Returns: An array of lanes. Returns an empty array if the board has no lanes.
   /// - Throws: ``KaitenError/notFound(resource:id:)`` if the board does not exist.
-  public func getBoardLanes(boardId: Int, condition: Int? = nil) async throws(KaitenError)
+  public func getBoardLanes(boardId: Int, condition: LaneCondition? = nil) async throws(KaitenError)
     -> [Components.Schemas.Lane]
   {
     guard
       let response = try await callList({
         try await client.get_list_of_lanes(
-          path: .init(board_id: boardId), query: .init(condition: condition))
+          path: .init(board_id: boardId), query: .init(condition: condition?.rawValue))
       })
     else {
       return []
@@ -1755,9 +1756,9 @@ extension KaitenClient {
     boardId: Int,
     title: String,
     sortOrder: Double? = nil,
-    type: Int? = nil,
+    type: ColumnType? = nil,
     wipLimit: Int? = nil,
-    wipLimitType: Int? = nil,
+    wipLimitType: WipLimitType? = nil,
     colCount: Int? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
@@ -1767,9 +1768,9 @@ extension KaitenClient {
           .init(
             title: title,
             sort_order: sortOrder,
-            _type: type,
+            _type: type?.rawValue,
             wip_limit: wipLimit,
-            wip_limit_type: wipLimitType,
+            wip_limit_type: wipLimitType?.rawValue,
             col_count: colCount
           )))
     }
@@ -1784,9 +1785,9 @@ extension KaitenClient {
     id: Int,
     title: String? = nil,
     sortOrder: Double? = nil,
-    type: Int? = nil,
+    type: ColumnType? = nil,
     wipLimit: Int? = nil,
-    wipLimitType: Int? = nil,
+    wipLimitType: WipLimitType? = nil,
     colCount: Int? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
@@ -1796,9 +1797,9 @@ extension KaitenClient {
           .init(
             title: title,
             sort_order: sortOrder,
-            _type: type,
+            _type: type?.rawValue,
             wip_limit: wipLimit,
-            wip_limit_type: wipLimitType,
+            wip_limit_type: wipLimitType?.rawValue,
             col_count: colCount
           )))
     }
@@ -1850,7 +1851,7 @@ extension KaitenClient {
     columnId: Int,
     title: String,
     sortOrder: Double? = nil,
-    type: Int? = nil
+    type: ColumnType? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
       try await client.create_subcolumn(
@@ -1859,7 +1860,7 @@ extension KaitenClient {
           .init(
             title: title,
             sort_order: sortOrder,
-            _type: type
+            _type: type?.rawValue
           )))
     }
     return try decodeResponse(
@@ -1873,7 +1874,7 @@ extension KaitenClient {
     id: Int,
     title: String? = nil,
     sortOrder: Double? = nil,
-    type: Int? = nil
+    type: ColumnType? = nil
   ) async throws(KaitenError) -> Components.Schemas.Column {
     let response = try await call {
       try await client.update_subcolumn(
@@ -1882,7 +1883,7 @@ extension KaitenClient {
           .init(
             title: title,
             sort_order: sortOrder,
-            _type: type
+            _type: type?.rawValue
           )))
     }
     return try decodeResponse(
@@ -1916,7 +1917,7 @@ extension KaitenClient {
     title: String,
     sortOrder: Double? = nil,
     wipLimit: Int? = nil,
-    wipLimitType: Int? = nil,
+    wipLimitType: WipLimitType? = nil,
     rowCount: Int? = nil
   ) async throws(KaitenError) -> Components.Schemas.Lane {
     let response = try await call {
@@ -1927,7 +1928,7 @@ extension KaitenClient {
             title: title,
             sort_order: sortOrder,
             wip_limit: wipLimit,
-            wip_limit_type: wipLimitType,
+            wip_limit_type: wipLimitType?.rawValue,
             row_count: rowCount
           )))
     }
@@ -1943,9 +1944,9 @@ extension KaitenClient {
     title: String? = nil,
     sortOrder: Double? = nil,
     wipLimit: Int? = nil,
-    wipLimitType: Int? = nil,
+    wipLimitType: WipLimitType? = nil,
     rowCount: Int? = nil,
-    condition: Int? = nil
+    condition: LaneCondition? = nil
   ) async throws(KaitenError) -> Components.Schemas.Lane {
     let response = try await call {
       try await client.update_lane(
@@ -1955,9 +1956,9 @@ extension KaitenClient {
             title: title,
             sort_order: sortOrder,
             wip_limit: wipLimit,
-            wip_limit_type: wipLimitType,
+            wip_limit_type: wipLimitType?.rawValue,
             row_count: rowCount,
-            condition: condition
+            condition: condition?.rawValue
           )))
     }
     return try decodeResponse(
