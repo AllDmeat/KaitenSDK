@@ -651,6 +651,28 @@ public struct KaitenClient: Sendable {
     return try decodeResponse(response.toCase(), notFoundResource: ("card", cardId)) { try $0.json }
   }
 
+  /// Updates a comment on a card.
+  ///
+  /// - Parameters:
+  ///   - cardId: The card identifier.
+  ///   - commentId: The comment identifier.
+  ///   - text: New comment text (markdown).
+  /// - Returns: The updated comment.
+  /// - Throws: ``KaitenError/notFound(resource:id:)`` if the card or comment does not exist.
+  public func updateComment(cardId: Int, commentId: Int, text: String) async throws(KaitenError)
+    -> Components.Schemas.Comment
+  {
+    let response = try await call {
+      try await client.update_card_comment(
+        path: .init(card_id: cardId, comment_id: commentId),
+        body: .json(.init(text: text))
+      )
+    }
+    return try decodeResponse(response.toCase(), notFoundResource: ("comment", commentId)) {
+      try $0.json
+    }
+  }
+
   /// Fetches all comments on a card.
   ///
   /// - Parameter cardId: The card identifier.

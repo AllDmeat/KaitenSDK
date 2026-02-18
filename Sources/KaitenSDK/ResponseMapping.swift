@@ -89,6 +89,18 @@ extension Operations.create_card_comment.Output {
   }
 }
 
+extension Operations.update_card_comment.Output {
+  func toCase() -> KaitenClient.ResponseCase<Operations.update_card_comment.Output.Ok.Body> {
+    switch self {
+    case .ok(let ok): .ok(ok.body)
+    case .unauthorized: .unauthorized
+    case .forbidden: .forbidden
+    case .notFound: .notFound
+    case .undocumented(statusCode: let code, _): .undocumented(statusCode: code)
+    }
+  }
+}
+
 // MARK: - Checklists
 
 extension Operations.create_checklist.Output {

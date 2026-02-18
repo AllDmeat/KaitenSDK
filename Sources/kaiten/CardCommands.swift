@@ -459,6 +459,31 @@ struct GetCardMembers: AsyncParsableCommand {
   }
 }
 
+struct UpdateComment: AsyncParsableCommand {
+  static let configuration = CommandConfiguration(
+    commandName: "update-comment",
+    abstract: "Update a comment on a card"
+  )
+
+  @OptionGroup var global: GlobalOptions
+
+  @Option(name: .long, help: "Card ID")
+  var cardId: Int
+
+  @Option(name: .long, help: "Comment ID")
+  var commentId: Int
+
+  @Option(name: .long, help: "New comment text (markdown)")
+  var text: String
+
+  func run() async throws {
+    let client = try await global.makeClient()
+    let comment = try await client.updateComment(
+      cardId: cardId, commentId: commentId, text: text)
+    try printJSON(comment)
+  }
+}
+
 struct AddComment: AsyncParsableCommand {
   static let configuration = CommandConfiguration(
     commandName: "add-comment",
