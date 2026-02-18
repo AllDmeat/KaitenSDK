@@ -21,6 +21,7 @@ struct Kaiten: AsyncParsableCommand {
       UpdateCard.self,
       GetCardComments.self,
       AddComment.self,
+      UpdateComment.self,
       GetCardMembers.self,
       CreateChecklist.self,
       ListCustomProperties.self,

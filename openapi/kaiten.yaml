@@ -516,6 +516,42 @@ paths:
           description: Forbidden
         '404':
           description: Not found
+  /cards/{card_id}/comments/{comment_id}:
+    patch:
+      summary: Update comment
+      operationId: update_card_comment
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: comment_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Comment ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCommentRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
   /cards/{card_id}/checklists:
     post:
       summary: Add checklist to card
@@ -1515,6 +1551,14 @@ components:
           - 'null'
           description: Calculation method
     CreateCommentRequest:
+      type: object
+      required:
+      - text
+      properties:
+        text:
+          type: string
+          description: Comment text (markdown)
+    UpdateCommentRequest:
       type: object
       required:
       - text
