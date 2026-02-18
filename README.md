@@ -6,6 +6,8 @@
 
 Swift SDK for the [Kaiten](https://kaiten.ru) project management API. OpenAPI-generated types with typed errors, automatic retry on `429 Too Many Requests`, and Bearer token authentication.
 
+Full Kaiten API documentation: [developers.kaiten.ru](https://developers.kaiten.ru)
+
 ## Installation
 
 ### As a library
@@ -66,14 +68,20 @@ let card = try await client.getCard(id: 123)
 
 The CLI resolves credentials in order: flags → config file.
 
+#### 1. Get a Kaiten API Token
+
+Get your API token at `https://<your-company>.kaiten.ru/profile/api-key`.
+
+#### 2. Configure Credentials
+
 **Option 1 — Config file** (recommended):
 
 Create `~/.config/kaiten-mcp/config.json`:
 
 ```json
 {
-  "url": "https://your-company.kaiten.ru/api/latest",
-  "token": "your-api-token"
+  "url": "https://<your-company>.kaiten.ru/api/latest",
+  "token": "<your-api-token>"
 }
 ```
 
@@ -211,18 +219,9 @@ kaiten list-spaces \
 
 ## Configuration
 
-The CLI and MCP server share the same config file at `~/.config/kaiten-mcp/config.json`:
-
-```json
-{
-  "url": "https://your-company.kaiten.ru/api/latest",
-  "token": "your-api-token"
-}
-```
+The CLI and MCP server share the same config file at `~/.config/kaiten-mcp/config.json` (see [Configure Credentials](#2-configure-credentials) above).
 
 The `--url` and `--token` CLI flags take priority over the config file.
-
-Kaiten token: Profile Settings → API Tokens → Create.
 
 ## Error Handling
 
