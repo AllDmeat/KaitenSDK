@@ -1419,6 +1419,158 @@ paths:
                 $ref: '#/components/schemas/User'
         '401':
           description: Invalid token
+  /cards/{card_id}/time-logs:
+    get:
+      summary: List time logs for a card
+      operationId: list_time_logs
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      - name: for_date
+        in: query
+        schema:
+          type: string
+        description: Filter by date (YYYY-MM-DD)
+      - name: personal
+        in: query
+        schema:
+          type: boolean
+        description: Filter time logs by current user
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TimeLog'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+    post:
+      summary: Create a time log on a card
+      operationId: create_time_log
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTimeLogRequest'
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TimeLog'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /cards/{card_id}/location-history:
+    get:
+      summary: Get card location history
+      operationId: get_card_location_history
+      parameters:
+      - name: card_id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Card ID
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardLocationHistory'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /card-types:
+    get:
+      summary: List card types
+      operationId: list_card_types
+      parameters:
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of types in response (max 100)
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CardType'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
+  /sprints:
+    get:
+      summary: List sprints
+      operationId: list_sprints
+      parameters:
+      - name: active
+        in: query
+        schema:
+          type: boolean
+        description: Filter by sprint active status
+      - name: limit
+        in: query
+        schema:
+          type: integer
+        description: Maximum amount of sprints (max 100)
+      - name: offset
+        in: query
+        schema:
+          type: integer
+        description: Number of records to skip
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Sprint'
+        '401':
+          description: Invalid token
+        '403':
+          description: Forbidden
 components:
   securitySchemes:
     bearerAuth:
@@ -3373,3 +3525,151 @@ components:
         blocker_card_id:
           type: integer
           description: Blocker card ID
+    TimeLog:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Time log ID
+        card_id:
+          type: integer
+          description: Card ID
+        user_id:
+          type: integer
+          description: User ID
+        role_id:
+          type: integer
+          description: Role ID (-1 = Employee)
+        author_id:
+          type: integer
+          description: Author ID
+        updater_id:
+          type: integer
+          description: Last updater ID
+        time_spent:
+          type: integer
+          description: Minutes logged
+        for_date:
+          type: string
+          description: Log date (YYYY-MM-DD)
+        comment:
+          type:
+          - string
+          - 'null'
+          description: Time log comment
+        created:
+          type: string
+          description: Create date
+        updated:
+          type: string
+          description: Last update timestamp
+    CreateTimeLogRequest:
+      type: object
+      required:
+      - role_id
+      - time_spent
+      - for_date
+      properties:
+        role_id:
+          type: integer
+          description: Role ID (-1 = Employee)
+        time_spent:
+          type: integer
+          minimum: 1
+          description: Minutes to log
+        for_date:
+          type: string
+          description: Log date (YYYY-MM-DD)
+        comment:
+          type: string
+          maxLength: 4096
+          description: Comment for time log
+    CardLocationHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Movement event ID
+        card_id:
+          type: integer
+          description: Card ID
+        board_id:
+          type: integer
+          description: Board ID
+        column_id:
+          type: integer
+          description: Column ID
+        subcolumn_id:
+          type:
+          - integer
+          - 'null'
+          description: Subcolumn ID
+        lane_id:
+          type: integer
+          description: Lane ID
+        sprint_id:
+          type:
+          - integer
+          - 'null'
+          description: Sprint ID
+        author_id:
+          type: integer
+          description: Author user ID
+        condition:
+          type: integer
+          description: 1 = Active, 2 = Archived, 3 = Deleted
+        changed:
+          type: string
+          description: Movement event timestamp
+    Sprint:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Sprint ID
+        board_id:
+          type: integer
+          description: Board ID
+        title:
+          type: string
+          description: Sprint title
+        goal:
+          type:
+          - string
+          - 'null'
+          description: Sprint goal
+        active:
+          type: boolean
+          description: Sprint active status
+        committed:
+          type: integer
+          description: Number of committed cards
+        velocity:
+          type: number
+          description: Sprint velocity
+        creator_id:
+          type: integer
+          description: Creator user ID
+        updater_id:
+          type: integer
+          description: Last updater user ID
+        start_date:
+          type: string
+          description: Sprint start date
+        finish_date:
+          type: string
+          description: Sprint planned finish date
+        actual_finish_date:
+          type:
+          - string
+          - 'null'
+          description: Sprint actual finish date
+        archived:
+          type: boolean
+          description: Archived flag
+        created:
+          type: string
+          description: Creation timestamp
+        updated:
+          type: string
+          description: Last update timestamp
