@@ -689,7 +689,7 @@ public struct KaitenClient: Sendable {
     let result: Components.Schemas.DeletedMemberResponse = try decodeResponse(
       response.toCase(), notFoundResource: ("member", userId)
     ) { try $0.json }
-    return result.id!
+    return result.id
   }
 
   /// Creates a comment on a card.
@@ -778,7 +778,7 @@ public struct KaitenClient: Sendable {
     let result: Components.Schemas.DeletedCommentResponse = try decodeResponse(
       response.toCase(), notFoundResource: ("comment", commentId)
     ) { try $0.json }
-    return result.id!
+    return result.id
   }
 
   // MARK: - Checklists
@@ -845,7 +845,7 @@ extension KaitenClient {
     let result: Components.Schemas.DeletedChecklistResponse = try decodeResponse(
       response.toCase(), notFoundResource: ("checklist", checklistId)
     ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
@@ -964,7 +964,7 @@ extension KaitenClient {
     let body = try decodeResponse(response.toCase(), notFoundResource: ("checklistItem", itemId)) {
       try $0.json
     }
-    return body.id!
+    return body.id
   }
 }
 
@@ -1323,7 +1323,7 @@ extension KaitenClient {
     let body = try decodeResponse(response.toCase(), notFoundResource: ("child", childId)) {
       try $0.json
     }
-    return body.id!
+    return body.id
   }
 
   /// Removes a tag from a card.
@@ -1342,7 +1342,7 @@ extension KaitenClient {
     let body = try decodeResponse(response.toCase(), notFoundResource: ("tag", tagId)) {
       try $0.json
     }
-    return body.id!
+    return body.id
   }
 }
 
@@ -1568,7 +1568,7 @@ extension KaitenClient {
     let result: Components.Schemas.DeletedExternalLinkResponse = try decodeResponse(
       response.toCase(), notFoundResource: ("externalLink", linkId)
     ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
@@ -1674,7 +1674,7 @@ extension KaitenClient {
       try decodeResponse(
         response.toCase(), notFoundResource: ("space", id)
       ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
@@ -1743,7 +1743,7 @@ extension KaitenClient {
       try decodeResponse(
         response.toCase(), notFoundResource: ("board", id)
       ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
@@ -1820,7 +1820,7 @@ extension KaitenClient {
       try decodeResponse(
         response.toCase(), notFoundResource: ("column", id)
       ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
@@ -1903,7 +1903,7 @@ extension KaitenClient {
       try decodeResponse(
         response.toCase(), notFoundResource: ("subcolumn", id)
       ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
@@ -1978,7 +1978,7 @@ extension KaitenClient {
       try decodeResponse(
         response.toCase(), notFoundResource: ("lane", id)
       ) { try $0.json }
-    return result.id!
+    return result.id
   }
 }
 
