@@ -7,14 +7,14 @@ public struct Page<T: Sendable>: Sendable {
   /// The limit used to fetch this page.
   public let limit: Int
   /// Whether there are likely more results available.
-  /// Determined by `items.count == limit`.
+  /// Uses explicit server-provided value when available, otherwise falls back to `items.count == limit`.
   public let hasMore: Bool
 
-  public init(items: [T], offset: Int, limit: Int) {
+  public init(items: [T], offset: Int, limit: Int, hasMore: Bool? = nil) {
     self.items = items
     self.offset = offset
     self.limit = limit
-    self.hasMore = items.count == limit
+    self.hasMore = hasMore ?? (items.count == limit)
   }
 }
 

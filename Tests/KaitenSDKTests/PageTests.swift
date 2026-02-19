@@ -53,4 +53,10 @@ struct PageTests {
     #expect(decoded.limit == 2)
     #expect(decoded.hasMore == true)
   }
+
+  @Test("explicit hasMore overrides count-based fallback")
+  func explicitHasMoreOverride() {
+    let page = Page(items: [1], offset: 0, limit: 10, hasMore: true)
+    #expect(page.hasMore == true)
+  }
 }
