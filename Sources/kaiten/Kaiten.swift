@@ -122,5 +122,5 @@ func printJSON(_ value: some Encodable) throws {
   let encoder = JSONEncoder()
   encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
   let data = try encoder.encode(value)
-  print(String(data: data, encoding: .utf8)!)
+  print(String(decoding: data, as: UTF8.self))
 }
