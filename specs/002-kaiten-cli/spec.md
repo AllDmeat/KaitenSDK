@@ -17,13 +17,13 @@ of parameters, and passes them to the SDK. No business logic.
 **Why this priority**: The sole purpose of this feature is to
 provide CLI access to the SDK.
 
-**Independent Test**: Run the binary with `--url`, `--token`
+**Independent Test**: Run the binary with `--url`, `--token-file`
 and a subcommand (e.g. `list-spaces`). Structured output in
 stdout confirms it works.
 
 **Acceptance Scenarios**:
 
-1. **Given** valid `--url` and `--token` flags, **When** the
+1. **Given** valid `--url` and `--token-file` flags, **When** the
    user runs a subcommand (e.g. `list-spaces`), **Then** the
    CLI outputs structured data to stdout.
 2. **Given** a valid config file exists at
@@ -31,7 +31,7 @@ stdout confirms it works.
    a subcommand without flags, **Then** the CLI reads parameters
    from the config file.
 3. **Given** both flags and a config file with different values
-   are present, **When** the user specifies `--url` or `--token`,
+   are present, **When** the user specifies `--url` or `--token-file`,
    **Then** flags take priority over the config file.
 4. **Given** neither flags nor the config file provide a required
    parameter, **When** the user runs a subcommand, **Then** the
@@ -74,8 +74,8 @@ stdout confirms it works.
 - What if a command exposes a parameter supported by the SDK (for example lane `rowCount`)?
   The CLI MUST forward the value to the SDK method and MUST NOT ignore it.
 - What if token is passed through process arguments (`--token`)?
-  The CLI MUST provide a non-argv secret input mode and documentation MUST
-  recommend secure alternatives to avoid leaking credentials in process lists/history.
+  The CLI MUST reject this input with a clear validation error and instruct
+  the user to use `--token-file` or `~/.config/kaiten/config.json`.
 
 ## Requirements *(mandatory)*
 
@@ -87,8 +87,9 @@ stdout confirms it works.
 - **FR-002**: The CLI MUST provide a subcommand for each SDK
   convenience method with corresponding arguments.
 - **FR-003**: The CLI MUST resolve connection parameters in
-  priority order: command-line flags > config file.
-  Environment variables are NOT used.
+   priority order: command-line flags > config file.
+   For token input, only `--token-file` (flag) or `config.json` are allowed.
+   Environment variables are NOT used.
 - **FR-004**: The CLI MUST output structured data to stdout and
   errors to stderr.
 - **FR-005**: The CLI MUST exit with code 0 on success and
@@ -135,9 +136,9 @@ stdout confirms it works.
   Silent dropping via optional coercion is forbidden.
 - **FR-015**: CSV/list-style ID filters MUST use strict token parsing consistently
   across commands (including `list-users --ids`); malformed tokens MUST fail locally.
-- **FR-016**: The CLI MUST offer a non-argv token input mode (for example stdin or
-  token file) and MUST document it as the preferred approach over `--token` to reduce
-  credential exposure in shell history and process listings.
+- **FR-016**: The CLI MUST NOT accept direct token literals from command-line arguments.
+  Token input is allowed only from files (`--token-file` and/or `~/.config/kaiten/config.json`).
+  If `--token` is provided, CLI MUST fail with a validation error describing supported token sources.
 
 ### Non-Functional Requirements
 
