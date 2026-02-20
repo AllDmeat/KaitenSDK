@@ -73,9 +73,6 @@ stdout confirms it works.
   or above endpoint max)? The CLI MUST fail locally before calling SDK.
 - What if a command exposes a parameter supported by the SDK (for example lane `rowCount`)?
   The CLI MUST forward the value to the SDK method and MUST NOT ignore it.
-- What if URL/token are passed as direct command-line arguments?
-  The CLI MUST reject this input with a clear validation error and instruct
-  the user to provide values via config file only.
 
 ## Requirements *(mandatory)*
 
@@ -139,8 +136,7 @@ stdout confirms it works.
   Silent dropping via optional coercion is forbidden.
 - **FR-015**: CSV/list-style ID filters MUST use strict token parsing consistently
   across commands (including `list-users --ids`); malformed tokens MUST fail locally.
-- **FR-016**: The CLI MUST NOT accept URL or token input from command-line arguments.
-  The only supported connection argument is `--config`.
+- **FR-016**: The only supported connection argument is `--config`.
   URL and token input is allowed only via selected config file (`--config` path or default config path).
 
 ### Non-Functional Requirements
