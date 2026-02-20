@@ -40,6 +40,10 @@ stdout confirms it works.
 5. **Given** the SDK returns an error, **When** the user runs a
    subcommand, **Then** the CLI outputs a human-readable error
    message to stderr and exits with a non-zero exit code.
+6. **Given** invalid CLI filter or pagination input (for example,
+   unknown enum value, malformed CSV IDs, or invalid `offset/limit`),
+   **When** the user runs a subcommand, **Then** the CLI fails fast
+   with a clear validation error and MUST NOT silently drop invalid values.
 
 ---
 
@@ -52,6 +56,16 @@ stdout confirms it works.
 - What if the config file does not exist and no flags are passed?
   The CLI MUST output an error with instructions: pass flags or
   create `~/.config/kaiten/config.json`.
+- What if enum-like options are invalid (for example lane condition,
+  column type, card state)? The CLI MUST fail with a validation error
+  listing allowed values.
+- What if comma-separated IDs/conditions contain invalid tokens?
+  The CLI MUST fail and identify the invalid token; partial parsing
+  is not allowed.
+- What if pagination is invalid (`offset < 0`, `limit <= 0`,
+  or above endpoint max)? The CLI MUST fail locally before calling SDK.
+- What if a command exposes a parameter supported by the SDK (for example lane `rowCount`)?
+  The CLI MUST forward the value to the SDK method and MUST NOT ignore it.
 
 ## Requirements *(mandatory)*
 
@@ -89,6 +103,20 @@ stdout confirms it works.
   target only, not the SDK.
 - **FR-008**: The CLI MUST NOT expose destructive delete commands for
   spaces, boards, or lanes.
+- **FR-009**: The CLI MUST validate user-provided enum and list inputs
+  before invoking SDK methods. Invalid enum values, malformed CSV tokens,
+  or partially parseable lists MUST produce a validation error; silent
+  dropping of invalid tokens is forbidden.
+- **FR-010**: The CLI MUST validate pagination parameters before SDK
+  invocation. Invalid values (`offset < 0`, `limit <= 0`, or values
+  above endpoint/documented caps) MUST fail fast with a clear error.
+- **FR-011**: If `config.json` exists but cannot be parsed or read,
+  the CLI MUST return a configuration error. Configuration read errors
+  MUST NOT be silently ignored.
+- **FR-012**: CLI command arguments MUST stay behaviorally aligned with
+  the mapped SDK method signature. If a CLI option is defined for a
+  command (for example lane `rowCount` in update-lane), it MUST be
+  forwarded to the SDK call.
 
 ### Non-Functional Requirements
 

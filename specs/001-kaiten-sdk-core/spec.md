@@ -88,6 +88,10 @@ A developer requests all spaces and boards — for navigation.
 - What if the API returns unknown fields? → they are ignored (forward compatibility)
 - What if the API returns 429 (rate limit)? → automatic retry with delay via `Task.retrying`
 - What if a custom property has an unknown type? → stored as raw value
+- What if `baseURL` uses a non-HTTPS scheme? → initialization MUST fail with a typed error
+- What if list endpoints return HTTP 200 with malformed/partial payloads? → MUST throw a typed decoding/network error, MUST NOT silently return an empty list
+- What if pagination inputs are invalid (`offset < 0`, `limit <= 0`, or above API max)? → MUST fail fast with a typed validation error
+- What if retry headers request very large waits? → retry delay MUST be bounded; long waits MUST be surfaced to caller via typed rate-limit error
 
 ## Requirements
 
@@ -113,6 +117,9 @@ A developer requests all spaces and boards — for navigation.
   - **Cross-checking is mandatory** — for any spec change, compare with documentation + verify against the real API. Documentation parsing guide: [docs/kaiten-docs-parsing.md](../../docs/kaiten-docs-parsing.md).
 - **FR-010**: SDK MUST support ALL query parameters documented in the Kaiten API for every endpoint in the spec. No subset, no phasing — every filter the API accepts MUST be present in the OpenAPI spec and exposed in the SDK's public API with backward-compatible optional defaults.
 - **FR-011**: SDK MUST NOT expose destructive delete operations for spaces, boards, and lanes.
+- **FR-012**: SDK MUST enforce secure transport for API authentication. `baseURL` MUST use `https`; non-HTTPS URLs MUST fail during initialization with a typed error.
+- **FR-013**: SDK list methods MUST NOT convert unexpected successful-response parsing failures into empty results. Empty list fallback is allowed only for explicitly confirmed empty response bodies.
+- **FR-014**: SDK MUST validate pagination inputs for list methods. Invalid values (`offset < 0`, `limit <= 0`, or values above documented endpoint caps) MUST fail fast with typed validation errors.
 
 ### Non-Functional Requirements
 
@@ -124,6 +131,7 @@ A developer requests all spaces and boards — for navigation.
 - **NFR-006**: Code MUST NOT use `nonisolated(unsafe)`. For mutable state in a Sendable context, use `Mutex` from `import Synchronization`
 - **NFR-007**: All public types (structs, enums, protocols) and methods MUST have Swift doc comments (`///`) following DocC conventions. Doc comments MUST include `- Parameter`, `- Returns`, and `- Throws` tags where applicable.
 - **NFR-008**: SDK source files MUST be grouped by Kaiten API documentation domains (for example: cards, boards, spaces, users) to keep endpoint parity checks maintainable.
+- **NFR-009**: Retry behavior for rate limiting MUST use a bounded delay policy. Header-derived delays (for example `Retry-After` and `X-RateLimit-Reset`) MUST be clamped to a configurable upper bound to avoid unbounded blocking.
 
 ### Key Entities
 
